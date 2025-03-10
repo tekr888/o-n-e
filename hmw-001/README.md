@@ -9,4 +9,6 @@
 
 ##  Решение:
  1. Топология из задания:
- ![](topology.png)
+ ![][def]
+
+[def]: topology.png
