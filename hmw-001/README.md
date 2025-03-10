@@ -34,4 +34,13 @@ VLAN Таблица:
 | 4    | Operations | S2: F0/18 = E4/1                                                  |
 | 7    | ParkinkLot | S1: F0/2-4 - E0/1-E0/3, F0/7-24 - E1/2-E5/3, G0/1-2 - N/A         |
 |      |            | S2: F0/2-17 - E0/0, E0/2-E4/0, F0/19-24 - E4/2-E5/3, G0/1-2 - N/A |
-| 8    | Native     | N/A                                                               |
+| 8    | Native     | N/A                                                               |  
+
+Trunk Таблица:  
+
+| Device |Trunk Interface Topology - EVE-NG |
+|:------:|:--------------------------------:|
+| S1     | F0/1, F0/5 - E0/0, E1/0          |
+| S2     | F0/1 - E0/1                      |  
+
+
