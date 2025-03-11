@@ -72,4 +72,27 @@ VLAN Name                             Status    Ports
 1003 token-ring-default               act/unsup
 1004 fddinet-default                  act/unsup
 1005 trnet-default                    act/unsup
+```  
+
+### VLAN с S2:  
+
 ```
+S2#sh vlan brief
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active
+3    Management                       active
+4    Operations                       active    Et4/1
+7    ParkingLot                       active    Et0/0, Et0/2, Et0/3, Et1/0
+                                                Et1/1, Et1/2, Et1/3, Et2/0
+                                                Et2/1, Et2/2, Et2/3, Et3/0
+                                                Et3/1, Et3/2, Et3/3, Et4/0
+                                                Et4/2, Et4/3, Et5/0, Et5/1
+                                                Et5/2, Et5/3
+8    Native                           active
+1002 fddi-default                     act/unsup
+1003 token-ring-default               act/unsup
+1004 fddinet-default                  act/unsup
+1005 trnet-default                    act/unsup
+```  
