@@ -74,7 +74,7 @@ VLAN Name                             Status    Ports
 1005 trnet-default                    act/unsup
 ```  
 
-### VLAN с S2:  
+VLAN с S2:  
 
 ```
 S2#sh vlan brief
@@ -98,7 +98,7 @@ VLAN Name                             Status    Ports
 ```  
 3. Транк между коммутаторами S1<-->S2:  
 
-### S1:  
+S1:  
 
 ```
 interface Ethernet0/0
@@ -108,7 +108,7 @@ interface Ethernet0/0
  switchport nonegotiate
  switchport mode trunk
 ```  
-### S2:  
+S2:  
 
 ```
 interface Ethernet0/1
