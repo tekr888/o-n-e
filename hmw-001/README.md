@@ -96,3 +96,25 @@ VLAN Name                             Status    Ports
 1004 fddinet-default                  act/unsup
 1005 trnet-default                    act/unsup
 ```  
+3. Транк между коммутаторами S1<-->S2:  
+
+### S1:  
+
+```
+interface Ethernet0/0
+ description -=To S2=-
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 8
+ switchport nonegotiate
+ switchport mode trunk
+```  
+### S2:  
+
+```
+interface Ethernet0/1
+ description -=To S1=-
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 8
+ switchport nonegotiate
+ switchport mode trunk
+```  
