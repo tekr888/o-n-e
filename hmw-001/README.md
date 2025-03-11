@@ -51,7 +51,7 @@ Trunk Таблица:
 
  2. Создание VLAN и их назначение на коммутаторах:  
 
-### VLAN с S1:  
+VLAN с S1:  
 
 ```
 S1#sh vlan brief
@@ -96,7 +96,7 @@ VLAN Name                             Status    Ports
 1004 fddinet-default                  act/unsup
 1005 trnet-default                    act/unsup
 ```  
-3. Транк между коммутаторами S1<-->S2:  
+3. Транк между коммутаторами S1<-->S2, а также транк для подключения S1<-->R1:  
 
 S1:  
 
@@ -107,6 +107,16 @@ interface Ethernet0/0
  switchport trunk native vlan 8
  switchport nonegotiate
  switchport mode trunk
+ !
+ ...
+ !
+ interface Ethernet1/0
+ description -=To R1=-
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 8
+ switchport nonegotiate
+ switchport mode trunk
+
 ```  
 S2:  
 
@@ -117,4 +127,29 @@ interface Ethernet0/1
  switchport trunk native vlan 8
  switchport nonegotiate
  switchport mode trunk
+```  
+4. Настроить маршрутизацию между VLAN на маршрутизаторе:  
+
+```
+...
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+!
+interface Ethernet0/1
+ description -=To S1=-
+ no ip address
+!
+interface Ethernet0/1.3
+ encapsulation dot1Q 3
+ ip address 192.168.3.1 255.255.255.0
+!
+interface Ethernet0/1.4
+ encapsulation dot1Q 4
+ ip address 192.168.4.1 255.255.255.0
+!
+interface Ethernet0/1.8
+!
+...
 ```  
