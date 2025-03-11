@@ -1,8 +1,9 @@
 Building configuration...
 
-Current configuration : 1472 bytes
+Current configuration : 1578 bytes
 !
-! Last configuration change at 15:41:40 UTC Sun Mar 9 2025
+! Last configuration change at 20:10:38 UTC Tue Mar 11 2025
+! NVRAM config last updated at 23:14:50 UTC Tue Mar 11 2025
 !
 version 15.4
 service timestamps debug datetime msec
@@ -125,6 +126,7 @@ control-plane
 !
 !
 !
+banner motd ^CUnauthorized access is prohibited!^C
 !
 line con 0
  password 7 00071A150754
