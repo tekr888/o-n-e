@@ -49,3 +49,25 @@ Trunk Таблица:
 | S2     | F0/1 - E0/1                      |  
 
 
+ 2. Создание VLAN и их назначение на коммутаторах:  
+
+```
+S1#sh vlan brief
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active
+3    Management                       active    Et1/1
+4    Operations                       active
+7    ParkingLot                       active    Et0/1, Et0/2, Et0/3, Et1/2
+                                                Et1/3, Et2/0, Et2/1, Et2/2
+                                                Et2/3, Et3/0, Et3/1, Et3/2
+                                                Et3/3, Et4/0, Et4/1, Et4/2
+                                                Et4/3, Et5/0, Et5/1, Et5/2
+                                                Et5/3
+8    Native                           active
+1002 fddi-default                     act/unsup
+1003 token-ring-default               act/unsup
+1004 fddinet-default                  act/unsup
+1005 trnet-default                    act/unsup
+```
