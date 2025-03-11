@@ -101,6 +101,8 @@ VLAN Name                             Status    Ports
 S1:  
 
 ```
+...
+!
 interface Ethernet0/0
  description -=To S2=-
  switchport trunk encapsulation dot1q
@@ -116,17 +118,23 @@ interface Ethernet0/0
  switchport trunk native vlan 8
  switchport nonegotiate
  switchport mode trunk
+ !
+ ...
 
 ```  
 S2:  
 
 ```
+...
+!
 interface Ethernet0/1
  description -=To S1=-
  switchport trunk encapsulation dot1q
  switchport trunk native vlan 8
  switchport nonegotiate
  switchport mode trunk
+ !
+ ...
 ```  
 4. Настроить маршрутизацию между VLAN на маршрутизаторе:  
 
