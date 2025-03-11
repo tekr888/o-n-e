@@ -9,7 +9,7 @@ service timestamps debug datetime msec
 service timestamps log datetime msec
 service password-encryption
 !
-hostname Router
+hostname R1
 !
 boot-start-marker
 boot-end-marker

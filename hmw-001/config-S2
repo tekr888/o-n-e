@@ -10,7 +10,7 @@ service timestamps log datetime msec
 service password-encryption
 service compress-config
 !
-hostname Switch
+hostname S2
 !
 boot-start-marker
 boot-end-marker
