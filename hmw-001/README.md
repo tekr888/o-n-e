@@ -206,4 +206,15 @@ PC-A>
 Смотреть в конфигурациях:  
   - [Конфигурация R1](config-R1);  
   - [Конфигурация S1](config-S1);  
-  - [Конфигурация S2](config-S2);
+  - [Конфигурация S2](config-S2);  
+
+  Примеры команд:  
+  ```
+  clock set 23:12:10 11 Mar 2025
+  banner motd #Unauthorized access is prohibited!#
+  copy running-config startup-config
+  no ip domain-lookup
+  vtp mode off
+  service password-encryption
+  enable algorithm-type sha256 you_password
+  ```  
