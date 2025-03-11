@@ -53,6 +53,7 @@ interface Ethernet0/0
  description -=To S2=-
  switchport trunk encapsulation dot1q
  switchport trunk native vlan 8
+ switchport nonegotiate
  switchport mode trunk
 !
 interface Ethernet0/1
@@ -71,6 +72,7 @@ interface Ethernet1/0
  description -=To R1=-
  switchport trunk encapsulation dot1q
  switchport trunk native vlan 8
+ switchport nonegotiate
  switchport mode trunk
 !
 interface Ethernet1/1
