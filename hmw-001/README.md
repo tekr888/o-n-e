@@ -163,9 +163,9 @@ interface Ethernet0/1.8
 ```  
 5. Проверка связанности:  
 
-   - [с PC-A на default gateway;]  
-   - [с PC-A на PC-B;]
-   - [с PC-A на S2;]
+   - с PC-A на default gateway;  
+   - с PC-A на PC-B;
+   - с PC-A на S2;
 
 ```
 PC-A> ping 192.168.3.1
