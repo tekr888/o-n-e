@@ -161,3 +161,36 @@ interface Ethernet0/1.8
 !
 ...
 ```  
+5. Проверка связанности:  
+
+   - [с PC-A на default gateway;]  
+   - [с PC-A на PC-B;]
+   - [с PC-A на S2;]
+
+```
+PC-A> ping 192.168.3.1
+
+84 bytes from 192.168.3.1 icmp_seq=1 ttl=255 time=0.791 ms
+84 bytes from 192.168.3.1 icmp_seq=2 ttl=255 time=1.082 ms
+84 bytes from 192.168.3.1 icmp_seq=3 ttl=255 time=1.131 ms
+84 bytes from 192.168.3.1 icmp_seq=4 ttl=255 time=1.280 ms
+84 bytes from 192.168.3.1 icmp_seq=5 ttl=255 time=1.478 ms
+
+PC-A> ping 192.168.4.3
+
+84 bytes from 192.168.4.3 icmp_seq=1 ttl=63 time=3.684 ms
+84 bytes from 192.168.4.3 icmp_seq=2 ttl=63 time=2.247 ms
+84 bytes from 192.168.4.3 icmp_seq=3 ttl=63 time=1.989 ms
+84 bytes from 192.168.4.3 icmp_seq=4 ttl=63 time=3.349 ms
+84 bytes from 192.168.4.3 icmp_seq=5 ttl=63 time=1.511 ms
+
+PC-A> ping 192.168.3.12
+
+84 bytes from 192.168.3.12 icmp_seq=1 ttl=255 time=0.827 ms
+84 bytes from 192.168.3.12 icmp_seq=2 ttl=255 time=1.508 ms
+84 bytes from 192.168.3.12 icmp_seq=3 ttl=255 time=0.690 ms
+84 bytes from 192.168.3.12 icmp_seq=4 ttl=255 time=0.651 ms
+84 bytes from 192.168.3.12 icmp_seq=5 ttl=255 time=0.823 ms
+
+PC-A>
+```  
