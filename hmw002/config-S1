@@ -1,0 +1,95 @@
+Building configuration...
+
+Current configuration : 1114 bytes
+!
+! Last configuration change at 21:40:15 UTC Wed Mar 12 2025
+! NVRAM config last updated at 21:31:51 UTC Wed Mar 12 2025
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service compress-config
+!
+hostname S1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 8 $8$7mdPLaLqy1iSdn$A6AHGJ1YkoGuwhVUPoQaUelvvnXpP9G2629yPk59Sok
+!
+no aaa new-model
+!
+!
+!
+!
+!
+vtp mode off
+!
+!
+!
+no ip domain-lookup
+ip cef
+no ipv6 cef
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+vlan internal allocation policy ascending
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ shutdown
+!
+interface Ethernet0/1
+ shutdown
+!
+interface Ethernet0/2
+ shutdown
+!
+interface Ethernet0/3
+ shutdown
+!
+interface Vlan1
+ ip address 192.168.1.1 255.255.255.0
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+control-plane
+!
+banner motd ^CUnauthorized access is prohibited!^C
+!
+line con 0
+ password 7 104D000A0618
+ logging synchronous
+ login
+line aux 0
+ password 7 104D000A0618
+ login
+line vty 0 4
+ password 7 104D000A0618
+ login
+!
+!
+end
