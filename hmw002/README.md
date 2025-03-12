@@ -127,3 +127,4 @@ Interface           Role Sts Cost      Prio.Nbr Type
 Et0/1               Altn BLK 100       128.2    Shr
 Et0/3               Root FWD 100       128.4    Shr
 ```  
+![](eve-ng2-2.png)  
