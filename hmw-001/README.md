@@ -216,5 +216,5 @@ PC-A>
   no ip domain-lookup
   vtp mode off
   service password-encryption
-  enable algorithm-type sha256 you_password
+  enable algorithm-type sha256 secret you_password
   ```  
