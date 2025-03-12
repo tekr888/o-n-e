@@ -73,7 +73,7 @@ VLAN0001
              This bridge is the root
              Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
 
-  ___Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)___
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
              Address     aabb.cc00.1000
              Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
              Aging Time  300 sec
