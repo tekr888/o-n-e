@@ -218,3 +218,4 @@ PC-A>
   service password-encryption
   enable algorithm-type sha256 secret you_password
   ```  
+  
