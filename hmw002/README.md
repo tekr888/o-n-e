@@ -12,7 +12,8 @@
 - [Конфигурация S3](config-S3);  
 
 # Решение:  
-Часть 1.  
+Часть 1. Создание сети и настройка основных параметров устройства:  
+
 Топология из задания:  
  ![](topology2.png)  
  Топология созданная в EVE-NG:  
@@ -60,7 +61,7 @@ Sending 5, 100-byte ICMP Echos to 192.168.1.3, timeout is 2 seconds:
 .!!!!
 Success rate is 80 percent (4/5), round-trip min/avg/max = 2/3/4 ms
 ```  
-Часть 2. Вывод STP и схема:  
+Часть 2. Выбор корневого моста:  
 
 S1:  
 ```
@@ -144,3 +145,115 @@ Et0/3               Root FWD 100       128.4    Shr
 4. Назначенными портами на коммутаторах являются порты: E0/1 и E0/3 на S1 и E0/3 на S2.  
 5. Алтернативный порт и заблокирован в настоящее время E0/1 на S3.  
 6. Скорость у портов одинаковая, Альтернативныйм выбран порт E0/1 на S3 что бы разорвать петлю, наибольший BID.  
+
+Часть 3. Наблюдение за процессом выбора протоколом STP порта, исходя из стоимости портов:  
+
+Вывод STP не с корневых коммутаторов:  
+
+```
+S3#sh spanning-tree
+
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        100
+             Port        4 (Ethernet0/3)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.3000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/1               Altn BLK 100       128.2    Shr
+Et0/3               Root FWD 100       128.4    Shr
+```  
+
+```
+S2#sh spanning-tree
+
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        100
+             Port        2 (Ethernet0/1)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.2000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/1               Root FWD 100       128.2    Shr
+Et0/3               Desg FWD 100       128.4    Shr
+```  
+Уменьшаем cost на S3:  
+
+```
+S3(config)#interface Ethernet0/3
+S3(config-if)#spanning-tree cos
+S3(config-if)#spanning-tree cost 18
+```  
+Вывод STP не с корневых коммуторов после изменения стоимости на S3:  
+
+```
+S3#sh spanning-tree
+
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        18
+             Port        4 (Ethernet0/3)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.3000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/1               Desg FWD 100       128.2    Shr
+Et0/3               Root FWD 18        128.4    Shr
+```  
+
+```
+S2#show spanning-tree
+
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        100
+             Port        2 (Ethernet0/1)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.2000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/1               Root FWD 100       128.2    Shr
+Et0/3               Altn BLK 100       128.4    Shr
+```  
+Теперь резервный линк на коммутаторе S2(E0/3) из-за изменения стоимости на S3(E0/3).  
+
+Вернём в первоначальное состояние:  
+
+```
+S3(config)#interface Ethernet0/3
+S3(config-if)#no spanning-tree cost 18
+```  
+
+Часть 4. Наблюдение за процессом выбора протоколом STP порта, исходя из приоритета портов:  
+
+
