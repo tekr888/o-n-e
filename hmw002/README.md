@@ -144,7 +144,7 @@ Et0/3               Root FWD 100       128.4    Shr
 3. Корневыми портами (роль) являются порты: E0/1 на S2 и E0/3 на S3.  
 4. Назначенными портами на коммутаторах являются порты: E0/1 и E0/3 на S1 и E0/3 на S2.  
 5. Алтернативный порт и заблокирован в настоящее время E0/1 на S3.  
-6. Альтернативным выбран порт E0/1 на S3 что бы разорвать петлю, наибольший BID, наибольший cost path.  
+6. Альтернативным выбран порт E0/1 на S3 что бы разорвать петлю, наибольший cost path. (заметка0: Данный ответ на вопрос касается только второй части. заметка1: наибольший BID )
 
 Часть 3. Наблюдение за процессом выбора протоколом STP порта, исходя из стоимости портов:  
 
@@ -256,4 +256,84 @@ S3(config-if)#no spanning-tree cost 18
 
 Часть 4. Наблюдение за процессом выбора протоколом STP порта, исходя из приоритета портов:  
 
+Включаем все интерфейсы на оборудовании (ЫS1, S2, S3):  
 
+```
+S1#sh spanning-tree
+
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             This bridge is the root
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.1000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Desg FWD 100       128.1    Shr
+Et0/1               Desg FWD 100       128.2    Shr
+Et0/2               Desg FWD 100       128.3    Shr
+Et0/3               Desg FWD 100       128.4    Shr
+```  
+```
+S2#sh spanning-tree
+
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        100
+             Port        1 (Ethernet0/0)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.2000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Root FWD 100       128.1    Shr
+Et0/1               Altn BLK 100       128.2    Shr
+Et0/2               Desg FWD 100       128.3    Shr
+Et0/3               Desg FWD 100       128.4    Shr
+```  
+```
+S3#sh spanning-tree
+
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        100
+             Port        3 (Ethernet0/2)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.3000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Altn BLK 100       128.1    Shr
+Et0/1               Altn BLK 100       128.2    Shr
+Et0/2               Root FWD 100       128.3    Shr
+Et0/3               Altn BLK 100       128.4    Shr
+```  
+Вопросы:  
+
+1. Какое значение протокол STP использует первым после выбора корневого моста, чтобы определить выбор порта?  
+2. Если первое значение на двух портах одинаково, какое следующее значение будет использовать протокол STP при выборе порта?  
+3. Если оба значения на двух портах равны, каким будет следующее значение, которое использует протокол STP при выборе порта?  
+
+Ответы:  
+
+1. Использует past cost.
+2. Следующим значением будет исполоьзовано BID.
+3. Если равны и past cost и BID, то следующем значением будет приоритет порта с его номером, приоритет всегда равен 128.номер порта.  
