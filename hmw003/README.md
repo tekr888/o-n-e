@@ -46,7 +46,7 @@ Max host: 192.168.1.110
 | R2         | G0/0/0 - E0/0                | 10.0.0.2     | 255.255.255.252 | N/A              |
 | R2         | G0/0/1 - E0/1                | 192.168.1.97 | 255.255.255.240 | N/A              |
 | S1         | VLAN200 - VLAN200            | 192.168.1.66 | 255.255.255.224 | 192.168.1.65     |
-| S2         | VLAN1 - VLAN1                | N/A          | N/A             | N/A              |
+| S2         | VLAN1 - VLAN1                | 192.168.1.98 | 255.255.255.240 | 192.168.1.97     |
 | PC-A       | NIC - NIC                    | DHCP         | DHPC            | DHCP             |
 | PC-B       | NIC - NIC                    | DHCP         | DHCP            | DHCP             |  
 
@@ -67,3 +67,37 @@ Trunk Таблица:
 | S1     | F0/5 - E1/0                      |
 | S2     | F0/5 - E1/0                      |  
 
+Проверка связонности:  
+
+R1<-->S1:  
+```
+R1# ping 192.168.1.66
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.1.66, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+```  
+S1<-->R1:  
+```
+S1#ping 192.168.1.65
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.1.65, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/3/6 ms
+```  
+R2<-->S2:  
+```
+R2#ping 192.168.1.98
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.1.98, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+```  
+S2<-->R2:  
+```
+S2#ping 192.168.1.97
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.1.97, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+```  
