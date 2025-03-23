@@ -240,3 +240,39 @@ PC-B> ping 192.168.1.97
 84 bytes from 192.168.1.97 icmp_seq=4 ttl=255 time=1.481 ms
 84 bytes from 192.168.1.97 icmp_seq=5 ttl=255 time=1.192 ms
 ```  
+
+```
+R1#show ip dhcp binding
+Bindings from all pools not associated with VRF:
+IP address          Client-ID/              Lease expiration        Type
+                    Hardware address/
+                    User name
+192.168.1.6         0100.5079.6668.01       Mar 26 2025 04:47 AM    Automatic
+192.168.1.104       0100.5079.6668.02       Mar 26 2025 05:38 AM    Automatic
+```  
+
+```
+R1#show ip dhcp server statistics
+Memory usage         58481
+Address pools        2
+Database agents      0
+Automatic bindings   2
+Manual bindings      0
+Expired bindings     2
+Malformed messages   0
+Secure arp entries   0
+
+Message              Received
+BOOTREQUEST          0
+DHCPDISCOVER         19
+DHCPREQUEST          2
+DHCPDECLINE          0
+DHCPRELEASE          0
+DHCPINFORM           0
+
+Message              Sent
+BOOTREPLY            0
+DHCPOFFER            15
+DHCPACK              2
+DHCPNAK              0
+```  
