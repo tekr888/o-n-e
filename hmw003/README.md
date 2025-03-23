@@ -11,7 +11,31 @@
   Топология созданная в EVE-NG:  
   ![](eve-ng3.png)  
 
-   Таблица адресов:  
+Подсети:  
+
+Subnet A:  
+Network: 192.168.1.0  
+Bitmask: 255.255.255.192 (26)  
+Broadcast: 192.168.1.63  
+Min host: 192.168.1.1  
+Max host: 192.168.1.62  
+
+Subnet B:  
+Network: 192.168.1.64  
+Bitmask: 255.255.255.224 (27)  
+Broadcast: 192.168.1.95  
+Min host: 192.168.1.65  
+Max host: 192.168.1.94  
+
+Subnet C:  
+Network: 192.168.1.66  
+Bitmask: 255.255.255.240 (28)  
+Broadcast: 192.168.1.111  
+Min host: 192.168.1.97  
+Max host: 192.168.1.110  
+
+Таблица адресов:  
+
 | Device     | Interface Topology - EVE-NG  | IP Address   | Subnet Mask     | Default Gateway  |
 |:----------:|:----------------------------:|:------------:|:---------------:|:----------------:|
 | R1         | G0/0/0/ - E0/0               | 10.0.0.1     | 255.255.255.252 | N/A              |
