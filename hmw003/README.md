@@ -47,7 +47,7 @@ Max host: 192.168.1.110
 | R2         | G0/0/1 - E0/1                | 192.168.1.97 | 255.255.255.240 | N/A              |
 | S1         | VLAN200 - VLAN200            | 192.168.1.66 | 255.255.255.224 | 192.168.1.65     |
 | S2         | VLAN1 - VLAN1                | 192.168.1.98 | 255.255.255.240 | 192.168.1.97     |
-| PC-A       | NIC - NIC                    | DHCP         | DHPC            | DHCP             |
+| PC-A       | NIC - NIC                    | DHCP         | DHCP            | DHCP             |
 | PC-B       | NIC - NIC                    | DHCP         | DHCP            | DHCP             |  
 
 VLAN Таблица:  
@@ -101,3 +101,5 @@ Sending 5, 100-byte ICMP Echos to 192.168.1.97, timeout is 2 seconds:
 !!!!!
 Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
 ```  
+2. Настройка двух DHCP-серверов на R1:  
+
