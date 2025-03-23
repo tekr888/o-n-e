@@ -102,6 +102,18 @@ Sending 5, 100-byte ICMP Echos to 192.168.1.97, timeout is 2 seconds:
 Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
 ```  
 
+Настройка статической маршрутизации на R1 и R2:  
+
+R1:  
+```
+ip route 0.0.0.0 0.0.0.0 10.0.0.2
+```  
+
+R2:  
+```
+ip route 0.0.0.0 0.0.0.0 10.0.0.1
+```  
+
 Проверка маршрутиазции R1<-->R2:  
 ```
 R1(config)#do ping 192.168.1.97
@@ -207,9 +219,24 @@ PC-A> ping 192.168.1.1
 
 3. Настройка DHCP-Relay на R2:  
 
+R2:
+```
+interface Ethernet0/1
+ ip address 192.168.1.97 255.255.255.240
+ ip helper-address 10.0.0.1
+```
 
 PC-B:  
 ```
+PC-B> dhcp
+DDORA IP 192.168.1.104/28 GW 192.168.1.97
 ```  
 ```
+PC-B> ping 192.168.1.97
+
+84 bytes from 192.168.1.97 icmp_seq=1 ttl=255 time=1.678 ms
+84 bytes from 192.168.1.97 icmp_seq=2 ttl=255 time=0.882 ms
+84 bytes from 192.168.1.97 icmp_seq=3 ttl=255 time=0.682 ms
+84 bytes from 192.168.1.97 icmp_seq=4 ttl=255 time=1.481 ms
+84 bytes from 192.168.1.97 icmp_seq=5 ttl=255 time=1.192 ms
 ```  
