@@ -28,7 +28,7 @@ Min host: 192.168.1.65
 Max host: 192.168.1.94  
 
 Subnet C:  
-Network: 192.168.1.66  
+Network: 192.168.1.96  
 Bitmask: 255.255.255.240 (28)  
 Broadcast: 192.168.1.111  
 Min host: 192.168.1.97  
