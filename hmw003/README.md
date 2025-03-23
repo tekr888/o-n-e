@@ -103,3 +103,21 @@ Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
 ```  
 2. Настройка двух DHCP-серверов на R1:  
 
+```
+R1#sh running-config | b dhcp
+ip dhcp excluded-address 192.168.1.1 192.168.1.5
+ip dhcp excluded-address 192.168.1.97 192.168.1.101
+!
+ip dhcp pool R1_Client_VLAN100
+ network 192.168.1.0 255.255.255.192
+ default-router 192.168.1.1
+ domain-name ccna.lab.com
+ lease 2 12 30
+!
+ip dhcp pool R2_Client_LAN
+ network 192.168.1.96 255.255.255.240
+ default-router 192.168.1.97
+ domain-name ccna.lab.com
+ lease 2 12 30
+!
+```  
