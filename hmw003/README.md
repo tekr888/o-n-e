@@ -120,4 +120,86 @@ ip dhcp pool R2_Client_LAN
  domain-name ccna.lab.com
  lease 2 12 30
 !
+``` 
+```
+R1#sh ip dhcp pool
+
+Pool R1_Client_VLAN100 :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0
+ Total addresses                : 62
+ Leased addresses               : 1
+ Pending event                  : none
+ 1 subnet is currently in the pool :
+ Current index        IP address range                    Leased addresses
+ 192.168.1.7          192.168.1.1      - 192.168.1.62      1
+
+Pool R2_Client_LAN :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0
+ Total addresses                : 14
+ Leased addresses               : 0
+ Pending event                  : none
+ 1 subnet is currently in the pool :
+ Current index        IP address range                    Leased addresses
+ 192.168.1.97         192.168.1.97     - 192.168.1.110     0
+```  
+```
+R1#sh ip dhcp binding
+Bindings from all pools not associated with VRF:
+IP address          Client-ID/              Lease expiration        Type
+                    Hardware address/
+                    User name
+192.168.1.6         0100.5079.6668.01       Mar 26 2025 04:47 AM    Automatic
+``` 
+
+```
+R1#sh ip dhcp server statistics
+Memory usage         33638
+Address pools        2
+Database agents      0
+Automatic bindings   1
+Manual bindings      0
+Expired bindings     0
+Malformed messages   0
+Secure arp entries   0
+
+Message              Received
+BOOTREQUEST          0
+DHCPDISCOVER         2
+DHCPREQUEST          1
+DHCPDECLINE          0
+DHCPRELEASE          0
+DHCPINFORM           0
+
+Message              Sent
+BOOTREPLY            0
+DHCPOFFER            1
+DHCPACK              1
+DHCPNAK              0
+```  
+Проверка получения IP-адреса от DHCP сервера и провекра связанности:  
+
+PC-A:  
+```
+PC-A> dhcp
+DDORA IP 192.168.1.6/26 GW 192.168.1.1
+```  
+```
+PC-A> ping 192.168.1.1
+
+84 bytes from 192.168.1.1 icmp_seq=1 ttl=255 time=0.601 ms
+84 bytes from 192.168.1.1 icmp_seq=2 ttl=255 time=1.807 ms
+84 bytes from 192.168.1.1 icmp_seq=3 ttl=255 time=1.282 ms
+84 bytes from 192.168.1.1 icmp_seq=4 ttl=255 time=0.576 ms
+84 bytes from 192.168.1.1 icmp_seq=5 ttl=255 time=0.837 ms
+```  
+
+3. Настройка DHCP-Relay на R2:  
+
+
+PC-B:  
+```
+```  
+```
 ```  
