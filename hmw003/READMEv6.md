@@ -58,11 +58,15 @@ Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
 ```  
 2. Проверяем SLAAC:  
 
-PC-A:
+*PC-A=PC-win7
+
+PC-1:  
 
 ![](dhcpv6-1.jpg)  
 
 3. Настройка Stateless DHCPv6 Server на R1:  
+
+*PC-A=PC-win7  
 
 R1:  
 
