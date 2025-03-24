@@ -56,5 +56,10 @@ Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
 ```  
 2. Проверяем SLAAC:  
 
+PC-A:
+
+![](dhcpv6-1.jpg)  
+
+
 
 
