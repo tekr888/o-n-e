@@ -39,6 +39,7 @@
 
 ```
 R1(config)#ipv6 route ::/0  2001:db8:acad:2::2
+R1(config)#ipv6 unicast-routing
 R1#ping 2001:db8:acad:3::1
 Type escape sequence to abort.
 Sending 5, 100-byte ICMP Echos to 2001:DB8:ACAD:3::1, timeout is 2 seconds:
@@ -48,6 +49,7 @@ Success rate is 100 percent (5/5), round-trip min/avg/max = 1/4/18 ms
 
 ```
 R2(config)#ipv6 route ::/0  2001:db8:acad:2::1
+R2(config)#ipv6 unicast-routing
 R2#ping 2001:db8:acad:1::1
 Type escape sequence to abort.
 Sending 5, 100-byte ICMP Echos to 2001:DB8:ACAD:1::1, timeout is 2 seconds:
@@ -60,6 +62,22 @@ PC-A:
 
 ![](dhcpv6-1.jpg)  
 
+3. Настройка Stateless DHCPv6 Server на R1:  
 
+R1:  
+
+```
+R1(config)# ipv6 dhcp pool R1-STATELESS
+R1(config-dhcp)# dns-server 2001:db8:acad::254
+R1(config-dhcp)# domain-name STATELESS.com
+R1(config)# interface g0/0/1
+R1(config-if)# ipv6 nd other-config-flag
+R1(config-if)# ipv6 dhcp server R1-STATELESS
+```  
+Результат на PC-A:  
+
+![](dhcpv6-2.jpg)  
+
+4. 
 
 
