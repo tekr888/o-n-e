@@ -102,10 +102,13 @@ SLAAC на PC-B:
 
 ![](dhcpv6-4.jpg)  
 
-R2:  
+Настройка Relay на R2:  
 
 ```
 R2(config)# interface Ethernet0/1
 R2(config-if)# ipv6 nd managed-config-flag
 R2(config-if)# ipv6 dhcp relay destination 2001:db8:acad:2::1 Ethernet0/0
 ```  
+Провекра на PC-B:  
+
+![](dhcpv6-5.jpg)  
