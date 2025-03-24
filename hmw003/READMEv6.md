@@ -35,5 +35,26 @@
 | PC-A       | NIC - NIC                    | DHCP                  |  
 | PC-B       | NIC - NIC                    | DHCP                  |  
 
+Настройка маршрутищзации и проверка связанности:  
+
+```
+R1(config)#ipv6 route ::/0  2001:db8:acad:2::2
+R1#ping 2001:db8:acad:3::1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 2001:DB8:ACAD:3::1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/4/18 ms
+```  
+
+```
+R2(config)#ipv6 route ::/0  2001:db8:acad:2::1
+R2#ping 2001:db8:acad:1::1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 2001:DB8:ACAD:1::1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+```  
+2. Проверяем SLAAC:  
+
 
 
