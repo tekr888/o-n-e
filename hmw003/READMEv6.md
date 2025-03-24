@@ -4,7 +4,7 @@
  1. Создать сеть на основе топологии и произвести базовые настройки;  
  2. Проверить назначения адреса SLAAC от R1;  
  3. Настройка и проверка Stateless DHCPv6 Server на R1;  
- 4. Настройка и проверка Statefull DHCPv6 Server на R1;
+ 4. Настройка  Statefull DHCPv6 Server на R1;
  5. Настройка и проверка DHCPv6 Relay на R2;  
 
  ## Конфигурации:  
@@ -74,7 +74,7 @@ R1:
 R1(config)# ipv6 dhcp pool R1-STATELESS
 R1(config-dhcp)# dns-server 2001:db8:acad::254
 R1(config-dhcp)# domain-name STATELESS.com
-R1(config)# interface g0/0/1
+R1(config)# interface Ethernet0/1
 R1(config-if)# ipv6 nd other-config-flag
 R1(config-if)# ipv6 dhcp server R1-STATELESS
 ```  
@@ -82,6 +82,22 @@ R1(config-if)# ipv6 dhcp server R1-STATELESS
 
 ![](dhcpv6-2.jpg)  
 
-4. 
+4. Настройка Statefull DHCPv6 Server на R1 для локальной сети R2:  
 
+```
+R1(config)# ipv6 dhcp pool R2-STATEFUL
+R1(config-dhcp)# address prefix 2001:db8:acad:3:aaa::/80
+R1(config-dhcp)# dns-server 2001:db8:acad::254
+R1(config-dhcp)# domain-name STATEFUL.com
+R1(config)# interface Ethernet0/0
+R1(config-if)# ipv6 dhcp server R2-STATEFUL
+```  
+5. Настройка и проверка DHCPv6 Relay на R2:  
 
+*PC-B=PC-win7  
+
+SLAAC на PC-B:  
+
+![](dhcpv6-3.jpg)  
+
+![](dhcpv6-4.jpg)  

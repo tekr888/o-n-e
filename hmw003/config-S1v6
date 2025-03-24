@@ -1,0 +1,152 @@
+Building configuration...
+Compressed configuration from 1658 bytes to 919 bytes[OK]
+S1(config)#do sh ru
+Building configuration...
+
+Current configuration : 1658 bytes
+!
+! Last configuration change at 19:09:07 UTC Mon Mar 24 2025
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service compress-config
+!
+hostname S1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 8 $8$YOV11Hw2hrYn81$LpexxxXxPuP.50dAHaqAYZJddghjVL0Fo7QBVLm4O1Y
+!
+no aaa new-model
+!
+!
+!
+!
+!
+vtp mode off
+!
+!
+!
+no ip domain-lookup
+ip cef
+no ipv6 cef
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+vlan internal allocation policy ascending
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ shutdown
+!
+interface Ethernet0/1
+ shutdown
+!
+interface Ethernet0/2
+ shutdown
+!
+interface Ethernet0/3
+ shutdown
+!
+interface Ethernet1/0
+!
+interface Ethernet1/1
+!
+interface Ethernet1/2
+ shutdown
+!
+interface Ethernet1/3
+ shutdown
+!
+interface Ethernet2/0
+ shutdown
+!
+interface Ethernet2/1
+ shutdown
+!
+interface Ethernet2/2
+ shutdown
+!
+interface Ethernet2/3
+ shutdown
+!
+interface Ethernet3/0
+ shutdown
+!
+interface Ethernet3/1
+ shutdown
+!
+interface Ethernet3/2
+ shutdown
+!
+interface Ethernet3/3
+ shutdown
+!
+interface Ethernet4/0
+ shutdown
+!
+interface Ethernet4/1
+ shutdown
+!
+interface Ethernet4/2
+ shutdown
+!
+interface Ethernet4/3
+ shutdown
+!
+interface Ethernet5/0
+ shutdown
+!
+interface Ethernet5/1
+ shutdown
+!
+interface Ethernet5/2
+ shutdown
+!
+interface Ethernet5/3
+ shutdown
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+control-plane
+!
+banner motd ^CUnauthorized access is prohibited!^C
+!
+line con 0
+ password 7 0822455D0A16
+ logging synchronous
+ login
+line aux 0
+ password 7 0822455D0A16
+ login
+line vty 0 4
+ password 7 0822455D0A16
+ login
+!
+!
+end
