@@ -112,3 +112,7 @@ R2(config-if)# ipv6 dhcp relay destination 2001:db8:acad:2::1 Ethernet0/0
 Провекра на PC-B:  
 
 ![](dhcpv6-5.jpg)  
+
+Проверка связи c PC-B<-->R1.Ethernet0/1:  
+
+![](pingv6.jpg)
