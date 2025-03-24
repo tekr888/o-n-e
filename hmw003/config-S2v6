@@ -57,6 +57,7 @@ interface Ethernet0/0
  shutdown
 !
 interface Ethernet0/1
+description -=To R2=-
 !
 interface Ethernet0/2
  shutdown
@@ -104,6 +105,7 @@ interface Ethernet4/0
  shutdown
 !
 interface Ethernet4/1
+description -=To PC-B=-
 !
 interface Ethernet4/2
  shutdown

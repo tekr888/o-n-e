@@ -66,8 +66,10 @@ interface Ethernet0/3
  shutdown
 !
 interface Ethernet1/0
+description -=To R1=-
 !
 interface Ethernet1/1
+description -=To PC-A=-
 !
 interface Ethernet1/2
  shutdown
