@@ -85,4 +85,28 @@ AS101(Китрон)
 | R22        | E0/0               | 100.0.13.22   | 255.255.255.224 | N/A              |
 |            | E0/1               | 110.0.110.22  | 255.255.255.224 | N/A              |
 |            | E0/2               | 111.0.10.22   | 255.255.255.224 | N/A              |
-|            |                    |               |                 |                  |
+|            |                    |               |                 |                  |  
+
+
+10. Маршрут по умолчанию для офиса Лабытанги:  
+
+```
+R27(config)#do sh ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is 200.20.2.1 to network 0.0.0.0
+
+S*    0.0.0.0/0 [1/0] via 200.20.2.1
+      200.20.2.0/24 is variably subnetted, 2 subnets, 2 masks
+C        200.20.2.0/24 is directly connected, Ethernet0/0
+L        200.20.2.27/32 is directly connected, Ethernet0/0
+```  
+
