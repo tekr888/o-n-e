@@ -71,6 +71,16 @@ AS1001 (Москва):
 | VPC-7      | NIC - NIC          | DHCP          | DHCP            | DHCP             |
 |            |                    |               |                 |                  |  
 
+VLAN Таблица:  
+| VLAN | NAME       | Interface Assigned Topology - EVE-NG |
+|:----:|:----------:|:------------------------------------:|
+| 11   | Management | SW3-SW6: N/A                         |
+| 12   | UserGroup1 | SW3: E0/2-3, E1/0-3                  |
+| 13   | UserGroup2 | SW5: E0/2-3, E1/0-3                  |
+| 3999 | Native     | N/A                                  |
+|      |            |                                      |  
+
+
 AS2042(Санкт-Питербург):  
 | Device     | Interface Topology | IP Address    | Subnet Mask     | Default Gateway  |
 |:----------:|:------------------:|:-------------:|:---------------:|:----------------:|
@@ -93,7 +103,15 @@ AS2042(Санкт-Питербург):
 |            | E0/3               | 99.0.99.18    | 255.255.255.0   | N/A              |
 |            |                    |               |                 |                  |
 | R32        | E0/0               | 84.84.84.32   | 255.255.255.0   | N/A              |
-|            |                    |               |                 |                  |
+|            |                    |               |                 |                  |  
+
+VLAN Таблица:  
+| VLAN | NAME       | Interface Assigned Topology - EVE-NG |
+|:----:|:----------:|:------------------------------------:|
+| 14   | Management | SW9: E0/2, E1/1-3                    |
+| 15   | UserGroup1 | S10: E0/2, E1/1  -3                  |
+| 3999 | Native     | N/A                                  |
+|      |            |                                      |
 
 AS301 (Ламас):
 | Device     | Interface Topology | IP Address    | Subnet Mask     | Default Gateway  |
@@ -149,7 +167,17 @@ AS520(Триада):
 |            | E0/2.17            | 10.177.17.1   | 255.255.255.0   | N/A              |
 |            | E0/2.18            | 10.177.18.1   | 255.255.255.0   | N/A              |
 |            | E0/2.19            | 10.177.19.1   | 255.255.255.0   | N/A              |
-|            |                    |               |                 |                  |
+|            |                    |               |                 |                  |  
+
+VLAN Таблица:  
+| VLAN | NAME       | Interface Assigned Topology - EVE-NG |
+|:----:|:----------:|:------------------------------------:|
+| 17   | Management | SW29: E0/3                           |
+| 18   | UserGroup1 | SW29: E0/0                           |
+| 19   | UserGroup2 | SW29: E0/1                           |
+| 3999 | Native     | N/A                                  |
+|      |            |                                      |  
+
 
 
 10. Маршрут по умолчанию для офиса Лабытанги:  
