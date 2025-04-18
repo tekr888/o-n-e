@@ -183,6 +183,8 @@ AS520(Триада):
 | SW29       | VLAN17             | 10.177.18.29  | 255.255.255.0   | 10.177.18.1      | N/A            |
 |            | VLAN18             | N/A           | N/A             | N/A              | N/A            |
 |            | VLAN19             | N/A           | N/A             | N/A              | N/A            |
+| VPC-30     | NIC - NIC          | DHCP          | DHCP            | DHCP             |                |
+| VPC-31     | NIC - NIC          | DHCP          | DHCP            | DHCP             |                |  
 
 VLAN Таблица:  
 | VLAN | NAME       | Interface Assigned Topology - EVE-NG |
