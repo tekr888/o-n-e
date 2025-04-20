@@ -262,9 +262,62 @@ route-map VLAN18-19, permit, sequence 20
     ip address (access-lists): VLAN18-19
   Set clauses:
     ip next-hop 93.0.93.26
-  Policy routing matches: 0 packets, 0 bytes
+  Policy routing matches: 30 packets, 3060 bytes
 DYNAMIC routemaps
 Current active dynamic routemaps = 0
+```  
+
+```
+R28(config)#do debug ip policy
+```  
+Запускаем трассировку с VPC30:  
+```
+VPC30> trace 93.0.93.26
+trace to 93.0.93.26, 8 hops max, press Ctrl+C to stop
+ 1   10.177.18.1   0.571 ms  0.432 ms  0.374 ms
+ 2   *93.0.93.26   0.696 ms (ICMP type:3, code:3, Destination port unreachable)  *
+```  
+```
+R28(config)#
+*Apr 20 19:02:19.778: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 92, FIB policy match
+*Apr 20 19:02:19.778: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 92, PBR Counted
+*Apr 20 19:02:19.778: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, g=93.0.93.26, len 92, FIB policy routed
+*Apr 20 19:02:20.779: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 92, FIB policy match
+*Apr 20 19:02:20.779: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 92, PBR Counted
+*Apr 20 19:02:20.779: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, g=93.0.93.26, len 92, FIB policy routed
+```  
+
+Запускаем ping с VPC30:  
+
+```
+VPC30> ping 93.0.93.26
+
+84 bytes from 93.0.93.26 icmp_seq=1 ttl=254 time=0.738 ms
+84 bytes from 93.0.93.26 icmp_seq=2 ttl=254 time=0.825 ms
+84 bytes from 93.0.93.26 icmp_seq=3 ttl=254 time=0.905 ms
+84 bytes from 93.0.93.26 icmp_seq=4 ttl=254 time=0.859 ms
+84 bytes from 93.0.93.26 icmp_seq=5 ttl=254 time=0.941 ms
+```  
+
+```
+R28(config)#do debug ip policy
+*Apr 20 19:06:34.475: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, FIB policy match
+*Apr 20 19:06:34.475: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, PBR Counted
+*Apr 20 19:06:34.475: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, g=93.0.93.26, len 84, FIB policy routed
+*Apr 20 19:06:35.477: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, FIB policy match
+*Apr 20 19:06:35.477: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, PBR Counted
+*Apr 20 19:06:35.477: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, g=93.0.93.26, len 84, FIB policy routed
+R28(config)#do debug ip policy
+*Apr 20 19:06:36.479: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, FIB policy match
+*Apr 20 19:06:36.479: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, PBR Counted
+*Apr 20 19:06:36.479: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, g=93.0.93.26, len 84, FIB policy routed
+*Apr 20 19:06:37.480: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, FIB policy match
+*Apr 20 19:06:37.480: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, PBR Counted
+*Apr 20 19:06:37.480: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, g=93.0.93.26, len 84, FIB policy routed
+R28(config)#do debug ip policy
+*Apr 20 19:06:38.483: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, FIB policy match
+*Apr 20 19:06:38.483: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, PBR Counted
+*Apr 20 19:06:38.483: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, g=93.0.93.26, len 84, FIB policy routed
 ```  
 
 Пример SLA на офисной сети в Чокурдах (R28):  
