@@ -318,6 +318,12 @@ R28(config)#do debug ip policy
 *Apr 20 19:06:38.483: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, FIB policy match
 *Apr 20 19:06:38.483: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, len 84, PBR Counted
 *Apr 20 19:06:38.483: IP: s=10.177.18.11 (Ethernet0/2.18), d=93.0.93.26, g=93.0.93.26, len 84, FIB policy routed
+``` 
+Выключаем debug:  
+
+```
+R28(config)#do no debug ip policy
+Policy routing debugging is off
 ```  
 
 Пример SLA на офисной сети в Чокурдах (R28):  
