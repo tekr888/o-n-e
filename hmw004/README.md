@@ -267,6 +267,48 @@ DYNAMIC routemaps
 Current active dynamic routemaps = 0
 ```  
 
+Пример SLA на офисной сети в Чокурдах (R28):  
+
+```
+!
+ip sla 10
+ icmp-echo 93.0.93.26 source-ip 93.0.93.28
+ threshold 100
+ timeout 100
+ frequency 5
+ip sla schedule 10 life forever start-time now
+!
+track 10 ip sla 10 reachability
+ delay down 60 up 60
+!
+ip route 0.0.0.0 0.0.0.0 93.0.93.26 track 10
+ip route 0.0.0.0 0.0.0.0 92.0.92.25
+!
+```  
+
+```
+R28(config)# do sh ip sla summary
+IPSLAs Latest Operation Summary
+Codes: * active, ^ inactive, ~ pending
+
+ID           Type        Destination       Stats       Return      Last
+                                           (ms)        Code        Run
+-----------------------------------------------------------------------
+*10          icmp-echo   93.0.93.26        RTT=1       OK          3 seconds ago
+```  
+
+```
+R28(config)# do sh ip sla statistics
+IPSLAs Latest Operation Statistics
+
+IPSLA operation id: 10
+        Latest RTT: 1 milliseconds
+Latest operation start time: 19:48:39 UTC Thu Mar 20 2025
+Latest operation return code: OK
+Number of successes: 254
+Number of failures: 0
+Operation time to live: Forever
+```  
 
 
 10. Маршрут по умолчанию для офиса Лабытанги:  
