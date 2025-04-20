@@ -14,7 +14,9 @@
 
 # Решение:  
 
-1. Адресное пространство: 
+## 1-6:  
+
+Адресное пространство: 
 
 Топология из задания:  
 ![](scheme.jpg) 
@@ -194,6 +196,76 @@ VLAN Таблица:
 | 19   | UserGroup2 | SW29: E0/1                           |
 | 3999 | Native     | N/A                                  |
 |      |            |                                      |  
+
+
+### 7-9:  
+
+Пример PBR на офисной сети в Чокурдах (R28):
+
+```
+R28(config)#do sh run | s route-map
+ ip policy route-map VLAN17
+route-map VLAN17 permit 10
+ match ip address VLAN17
+ set ip next-hop 92.0.92.25
+route-map VLAN18-19 permit 20
+ match ip address VLAN18-19
+ set ip next-hop 93.0.93.26
+```  
+
+```
+R28(config)#do sh run | s access-list
+ip access-list standard VLAN17
+ permit 10.177.17.0 0.0.0.255
+ip access-list standard VLAN18-19
+ permit 10.177.18.0 0.0.1.255
+```  
+
+```
+!
+interface Ethernet0/2.17
+ encapsulation dot1Q 17
+ ip address 10.177.17.1 255.255.255.0
+ ip policy route-map VLAN17
+!
+interface Ethernet0/2.18
+ encapsulation dot1Q 18
+ ip address 10.177.18.1 255.255.255.0
+ ip policy route-map VLAN18-19
+!
+interface Ethernet0/2.19
+ encapsulation dot1Q 19
+ ip address 10.177.19.1 255.255.255.0
+ ip policy route-map VLAN18-19
+!
+```  
+
+```
+R28(config)#do sh ip policy
+Interface      Route map
+Ethernet0/2.17 VLAN17
+Ethernet0/2.18 VLAN18-19
+Ethernet0/2.19 VLAN18-19
+```  
+
+```
+R28(config)#do sh route-map all
+STATIC routemaps
+route-map VLAN17, permit, sequence 10
+  Match clauses:
+    ip address (access-lists): VLAN17
+  Set clauses:
+    ip next-hop 92.0.92.25
+  Policy routing matches: 0 packets, 0 bytes
+route-map VLAN18-19, permit, sequence 20
+  Match clauses:
+    ip address (access-lists): VLAN18-19
+  Set clauses:
+    ip next-hop 93.0.93.26
+  Policy routing matches: 0 packets, 0 bytes
+DYNAMIC routemaps
+Current active dynamic routemaps = 0
+```  
 
 
 
