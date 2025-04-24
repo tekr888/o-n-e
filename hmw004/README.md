@@ -11,6 +11,10 @@
 8. Распределите трафик между двумя линками с провайдером.  
 9. Настроите отслеживание линка через технологию IP SLA.(только для IPv4).  
 10. Настройте для офиса Лабытнанги маршрут по-умолчанию.  
+11. Маршрутизаторы R14-R15 находятся в зоне 0 - backbone.  
+12. Маршрутизаторы R12-R13 находятся в зоне 10. Дополнительно к маршрутам должны получать маршрут по умолчанию.  
+13. Маршрутизатор R19 находится в зоне 101 и получает только маршрут по умолчанию.  
+14. Маршрутизатор R20 находится в зоне 102 и получает все маршруты, кроме маршрутов до сетей зоны 101.  
 
 # Решение:  
 
@@ -391,4 +395,130 @@ S*    0.0.0.0/0 [1/0] via 200.20.2.1
 C        200.20.2.0/24 is directly connected, Ethernet0/0
 L        200.20.2.27/32 is directly connected, Ethernet0/0
 ```  
+### 11-14:  
 
+Настройка OSPF на R14:  
+```
+!
+interface Ethernet0/0
+ description -=To R12=-
+ ip address 100.0.10.14 255.255.255.240
+ ip ospf 1 area 10
+!
+interface Ethernet0/1
+ description -=To R13=-
+ ip address 100.0.9.14 255.255.255.240
+ ip ospf 1 area 10
+!
+interface Ethernet0/3
+ description -=To R19=-
+ ip address 100.0.12.14 255.255.255.224
+ ip ospf 1 area 101
+!
+router ospf 1
+ router-id 1.1.1.1
+ area 101 stub no-summary
+ network 100.0.9.14 0.0.0.0 area 0
+ network 100.0.10.14 0.0.0.0 area 0
+ network 100.0.12.14 0.0.0.0 area 0
+!
+```  
+
+Настройка OSPF на R15 с фильтрацией:
+```
+!
+interface Ethernet0/0
+ description -=To R13=-
+ ip address 100.0.10.11 255.255.255.240
+ ip ospf 1 area 10
+!
+interface Ethernet0/1
+ description -=To R12=-
+ ip address 100.0.11.11 255.255.255.240
+ ip ospf 1 area 10
+!
+!
+interface Ethernet0/3
+ description -=To R20=-
+ ip address 100.0.16.15 255.255.255.224
+ ip ospf 1 area 102
+!
+router ospf 1
+ router-id 1.1.1.2
+ area 0 filter-list prefix DENY_101_ZONE out
+ network 100.0.10.11 0.0.0.0 area 0
+ network 100.0.11.11 0.0.0.0 area 0
+ network 100.0.16.13 0.0.0.0 area 0
+ !
+ip prefix-list DENY_101_ZONE seq 5 deny 100.0.12.0/27
+ip prefix-list DENY_101_ZONE seq 10 permit 0.0.0.0/0 le 32
+!
+```  
+Настройка OSPF на R12 с маршрутом по умолчанию:  
+```
+!
+interface Ethernet0/2
+ description -=To R14=-
+ ip address 100.0.10.12 255.255.255.240
+ ip ospf 1 area 10
+!
+interface Ethernet0/3
+ description -=To R15=-
+ ip address 100.0.11.12 255.255.255.240
+ ip ospf 1 area 10
+!
+router ospf 1
+ router-id 2.2.2.1
+ network 100.0.10.12 0.0.0.0 area 10
+ network 100.0.11.12 0.0.0.0 area 10
+ default-information originate
+ ! 
+```  
+
+Настройка OSPF на R13 с маршрутом по умолчанию:  
+```
+!
+interface Ethernet0/2
+ description -=To R15=-
+ ip address 100.0.10.13 255.255.255.240
+ ip ospf 1 area 10
+!
+interface Ethernet0/3
+ description -=To R14=-
+ ip address 100.0.9.13 255.255.255.240
+ ip ospf 1 area 10
+!
+router ospf 1
+ router-id 2.2.2.2
+ network 100.0.10.13 0.0.0.0 area 10
+ network 100.0.11.13 0.0.0.0 area 10
+ default-information originate
+!
+```  
+
+Настройка OSPF на R19:  
+```
+!
+interface Ethernet0/0
+ description -=To R14=-
+ ip address 100.0.12.19 255.255.255.224
+ ip ospf 1 area 101
+router ospf 1
+ router-id 3.3.3.1
+ passive-interface default
+ network 100.0.12.19 0.0.0.0 area 101
+!
+```  
+Настройка OSPF на R20:  
+```
+!
+interface Ethernet0/0
+ description -=To R15=-
+ ip address 100.0.16.20 255.255.255.224
+ ip ospf 1 area 102
+ !
+router ospf 1
+ router-id 3.3.3.2
+ network 100.0.16.20 0.0.0.0 area 102
+!
+```  
