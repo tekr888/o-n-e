@@ -415,12 +415,14 @@ interface Ethernet0/3
  ip address 100.0.12.14 255.255.255.224
  ip ospf 1 area 101
 !
+interface Ethernet1/0
+ ip address 100.100.100.14 255.255.255.0
+ ip ospf 1 area 0
+!
 router ospf 1
  router-id 1.1.1.1
+ area 10 stub
  area 101 stub no-summary
- network 100.0.9.14 0.0.0.0 area 0
- network 100.0.10.14 0.0.0.0 area 0
- network 100.0.12.14 0.0.0.0 area 0
 !
 ```  
 
@@ -443,12 +445,13 @@ interface Ethernet0/3
  ip address 100.0.16.15 255.255.255.224
  ip ospf 1 area 102
 !
+interface Ethernet1/0
+ ip address 100.100.100.15 255.255.255.0
+ ip ospf 1 area 0
+!
 router ospf 1
  router-id 1.1.1.2
- area 0 filter-list prefix DENY_101_ZONE out
- network 100.0.10.11 0.0.0.0 area 0
- network 100.0.11.11 0.0.0.0 area 0
- network 100.0.16.13 0.0.0.0 area 0
+ area 102 filter-list prefix DENY_101_ZONE in
  !
 ip prefix-list DENY_101_ZONE seq 5 deny 100.0.12.0/27
 ip prefix-list DENY_101_ZONE seq 10 permit 0.0.0.0/0 le 32
@@ -467,11 +470,16 @@ interface Ethernet0/3
  ip address 100.0.11.12 255.255.255.240
  ip ospf 1 area 10
 !
+interface Ethernet1/1
+ description -=To R13=-
+ ip address 100.99.99.13 255.255.255.0
+ ip ospf 1 area 10
+!
 router ospf 1
  router-id 2.2.2.1
+ area 10 stub
  network 100.0.10.12 0.0.0.0 area 10
  network 100.0.11.12 0.0.0.0 area 10
- default-information originate
  ! 
 ```  
 
@@ -488,12 +496,17 @@ interface Ethernet0/3
  ip address 100.0.9.13 255.255.255.240
  ip ospf 1 area 10
 !
+interface Ethernet1/1
+ description -=To R12=-
+ ip address 100.99.99.12 255.255.255.0
+ ip ospf 1 area 10
+ !
 router ospf 1
  router-id 2.2.2.2
+ area 10 stub
  network 100.0.10.13 0.0.0.0 area 10
  network 100.0.11.13 0.0.0.0 area 10
- default-information originate
-!
+ !
 ```  
 
 Настройка OSPF на R19:  
@@ -505,7 +518,9 @@ interface Ethernet0/0
  ip ospf 1 area 101
 router ospf 1
  router-id 3.3.3.1
+ area 101 stub
  passive-interface default
+ no passive-interface Ethernet0/0
  network 100.0.12.19 0.0.0.0 area 101
 !
 ```  
