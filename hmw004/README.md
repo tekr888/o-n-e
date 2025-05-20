@@ -543,3 +543,200 @@ router ospf 1
  network 100.0.16.20 0.0.0.0 area 102
 !
 ```  
+### 15:  
+
+Настройки IS-IS в Триада (AS520):  
+
+Настройки IS-IS R23:  
+```
+!
+router isis TRIADA
+ net 49.2222.0023.0000.00
+ is-type level-2-only
+ metric-style wide
+ log-adjacency-changes
+ !
+ address-family ipv6
+  multi-topology
+ exit-address-family
+!
+interface Ethernet0/1
+ description -=To R25=-
+ ip address 95.0.95.23 255.255.255.224
+ ip router isis TRIADA
+ ipv6 address 2001:95:0:95::23/64
+ ipv6 router isis TRIADA
+!
+interface Ethernet0/2
+ description -=To R24=-
+ ip address 96.0.96.23 255.255.255.224
+ ip router isis TRIADA
+ ipv6 address 2001:96:0:96::23/64
+ ipv6 router isis TRIADA
+!
+```  
+Настройки IS-IS R24:  
+```
+router isis TRIADA
+ net 49.0024.0024.0000.00
+ is-type level-2-only
+ metric-style wide
+ log-adjacency-changes
+ !
+ address-family ipv6
+  multi-topology
+ exit-address-family
+!
+interface Ethernet0/1
+ description -=To R26=-
+ ip address 97.0.97.24 255.255.255.224
+ ip router isis TRIADA
+ ipv6 address 2001:97:0:97::24/64
+ ipv6 router isis TRIADA
+!
+interface Ethernet0/2
+ description -=To R23=-
+ ip address 96.0.96.24 255.255.255.224
+ ip router isis TRIADA
+ ipv6 address 2001:96:0:96::24/64
+ ipv6 router isis TRIADA
+!
+```  
+Настройки IS-IS R25:  
+```
+!
+router isis TRIADA
+ net 49.2222.0025.0000.00
+ is-type level-2-only
+ metric-style wide
+ log-adjacency-changes
+ !
+ address-family ipv6
+  multi-topology
+ exit-address-family
+!
+interface Ethernet0/0
+ description -=To R23=-
+ ip address 95.0.95.25 255.255.255.224
+ ip router isis TRIADA
+ ipv6 address 2001:95:0:95::25/64
+ ipv6 router isis TRIADA
+!
+interface Ethernet0/2
+ description -=To R26=-
+ ip address 94.0.94.25 255.255.255.224
+ ip router isis TRIADA
+ ipv6 address 2001:94:0:94::25/64
+ ipv6 router isis TRIADA
+!
+
+```  
+Настройки IS-IS R26:  
+```
+!
+router isis TRIADA
+ net 49.0026.0026.0000.00
+ is-type level-2-only
+ metric-style wide
+ log-adjacency-changes
+ !
+ address-family ipv6
+  multi-topology
+ exit-address-family
+!
+interface Ethernet0/0
+ description -=To R24=-
+ ip address 97.0.97.26 255.255.255.224
+ ip router isis TRIADA
+ ipv6 address 2001:97:0:97::26/64
+ ipv6 router isis TRIADA
+!
+interface Ethernet0/2
+ description -=To R25=-
+ ip address 94.0.94.26 255.255.255.224
+ ip router isis TRIADA
+ ipv6 address 2001:94:0:94::26/64
+ ipv6 router isis TRIADA
+!
+```  
+Для настройки IPv6 не забыть ввести команду:  
+```
+ipv6 unicast-routing
+```  
+Пример проверки:  
+```
+R26# sh isis database
+
+Tag TRIADA:
+IS-IS Level-2 Link State Database:
+LSPID                 LSP Seq Num  LSP Checksum  LSP Holdtime      ATT/P/OL
+R24.00-00             0x0000007E   0xC424        696               0/0/0
+R24.01-00             0x0000006D   0xC0A9        680               0/0/0
+R26.00-00           * 0x0000007D   0x08DD        584               0/0/0
+R26.01-00           * 0x0000006D   0xDEA2        561               0/0/0
+R26.02-00           * 0x0000006B   0xCD93        651               0/0/0
+R23.00-00             0x00000081   0x296E        604               0/0/0
+R25.00-00             0x00000080   0xFC99        520               0/0/0
+R25.01-00             0x0000006E   0x9690        547               0/0/0
+```  
+```
+R26#sh isis ip topology
+
+Tag TRIADA:
+
+IS-IS TID 0 paths to level-2 routers
+System Id            Metric     Next-Hop             Interface   SNPA
+R24                  10         R24                  Et0/0       aabb.cc01.8010
+R26                  --
+R23                  20         R24                  Et0/0       aabb.cc01.8010
+                                R25                  Et0/2       aabb.cc01.9020
+R25                  10         R25                  Et0/2       aabb.cc01.9020
+```  
+```
+R26#sh isis ipv6 topology
+
+Tag TRIADA:
+
+IS-IS TID 2 paths to level-2 routers
+System Id            Metric     Next-Hop             Interface   SNPA
+R24                  10         R24                  Et0/0       aabb.cc01.8010
+R26                  --
+R23                  20         R24                  Et0/0       aabb.cc01.8010
+                                R25                  Et0/2       aabb.cc01.9020
+R25                  10         R25                  Et0/2       aabb.cc01.9020
+```  
+```
+R26#sh ip route isis
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is 93.0.93.28 to network 0.0.0.0
+
+      95.0.0.0/27 is subnetted, 1 subnets
+i L2     95.0.95.0 [115/20] via 94.0.94.25, 00:25:15, Ethernet0/2
+      96.0.0.0/27 is subnetted, 1 subnets
+i L2     96.0.96.0 [115/20] via 97.0.97.24, 00:25:15, Ethernet0/0
+```  
+```
+R26#sh ipv6 route isis
+IPv6 Routing Table - default - 7 entries
+Codes: C - Connected, L - Local, S - Static, U - Per-user Static route
+       B - BGP, HA - Home Agent, MR - Mobile Router, R - RIP
+       H - NHRP, I1 - ISIS L1, I2 - ISIS L2, IA - ISIS interarea
+       IS - ISIS summary, D - EIGRP, EX - EIGRP external, NM - NEMO
+       ND - ND Default, NDp - ND Prefix, DCE - Destination, NDr - Redirect
+       O - OSPF Intra, OI - OSPF Inter, OE1 - OSPF ext 1, OE2 - OSPF ext 2
+       ON1 - OSPF NSSA ext 1, ON2 - OSPF NSSA ext 2, la - LISP alt
+       lr - LISP site-registrations, ld - LISP dyn-eid, a - Application
+I2  2001:95:0:95::/64 [115/20]
+     via FE80::A8BB:CCFF:FE01:9020, Ethernet0/2
+I2  2001:96:0:96::/64 [115/20]
+     via FE80::A8BB:CCFF:FE01:8010, Ethernet0/0
+```  
