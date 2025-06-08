@@ -20,7 +20,18 @@
 - R24 находится в зоне 24;  
 - R26 находится в зоне 26;  
 - Настройка осуществляется одновременно для IPv4 и IPv6.  
-
+16. Настроить EIGRP в С.-Петербург:  
+- В офисе С.-Петербург настроить EIGRP;  
+- R32 получает только маршрут по умолчанию;  
+- R16-17 анонсируют только суммарные префиксы;  
+- Использовать EIGRP named-mode для настройки сети;
+- Настройка осуществляется одновременно для IPv4 и IPv6.  
+17. Настроить BGP между автономными системами. Организовать доступность между офисами Москва и С.-Петербург:  
+- Настроите eBGP между офисом Москва и двумя провайдерами - Киторн и Ламас;  
+- Настроите eBGP между провайдерами Киторн и Ламас;  
+- Настроите eBGP между Ламас и Триада;  
+- Настроите eBGP между офисом С.-Петербург и провайдером Триада;  
+- Организуете IP доступность между пограничным роутерами офисами Москва и С.-Петербург.  
 
 # Решение:  
 
@@ -740,3 +751,234 @@ I2  2001:95:0:95::/64 [115/20]
 I2  2001:96:0:96::/64 [115/20]
      via FE80::A8BB:CCFF:FE01:8010, Ethernet0/0
 ```  
+### 16:  
+
+### 17:
+
+Настроите eBGP между офисом Москва и двумя провайдерами - Киторн и Ламас:  
+
+- eBGP между Москва (R14 AS1001) и Киторн (R22 AS101):
+
+```
+R14#sh run | s bgp
+router bgp 1001
+ bgp log-neighbor-changes
+ network 109.0.13.0 mask 255.255.255.224
+ neighbor 109.0.13.22 remote-as 101
+```  
+
+```
+R22#sh run | s bg
+router bgp 101
+ bgp log-neighbor-changes
+ network 109.0.13.0 mask 255.255.255.224
+ network 110.0.110.0 mask 255.255.255.224
+ network 111.0.10.0 mask 255.255.255.224
+ neighbor 109.0.13.14 remote-as 1001
+ neighbor 110.0.110.21 remote-as 301
+ neighbor 111.0.10.23 remote-as 520
+```  
+
+- eBGP между Москва (R15 AS1001) и Ламас (R22 AS301):  
+
+```
+R15#sh run | s bg
+router bgp 1001
+ bgp log-neighbor-changes
+ network 100.0.13.0 mask 255.255.255.224
+ neighbor 100.0.13.21 remote-as 301
+```  
+
+```
+R21#sh run | s bg
+router bgp 301
+ bgp log-neighbor-changes
+ network 100.0.13.0 mask 255.255.255.224
+ network 110.0.110.0 mask 255.255.255.224
+ network 112.0.10.0 mask 255.255.255.224
+ neighbor 100.0.13.15 remote-as 1001
+ neighbor 110.0.110.22 remote-as 101
+ neighbor 112.0.10.24 remote-as 520
+```  
+
+- eBGP между Киторн (R22 AS101) и Ламас (R21 AS301):  
+
+```
+R22#sh run | s bg
+router bgp 101
+ bgp log-neighbor-changes
+ network 109.0.13.0 mask 255.255.255.224
+ network 110.0.110.0 mask 255.255.255.224
+ network 111.0.10.0 mask 255.255.255.224
+ neighbor 109.0.13.14 remote-as 1001
+ neighbor 110.0.110.21 remote-as 301
+ neighbor 111.0.10.23 remote-as 520
+```  
+
+```
+R21#sh run | s bg
+router bgp 301
+ bgp log-neighbor-changes
+ network 100.0.13.0 mask 255.255.255.224
+ network 110.0.110.0 mask 255.255.255.224
+ network 112.0.10.0 mask 255.255.255.224
+ neighbor 100.0.13.15 remote-as 1001
+ neighbor 110.0.110.22 remote-as 101
+ neighbor 112.0.10.24 remote-as 520
+```  
+
+- eBGP между Ламас (R21 AS301) и Триада (R24 AS520):  
+
+```
+R21#sh run | s bg
+router bgp 301
+ bgp log-neighbor-changes
+ network 100.0.13.0 mask 255.255.255.224
+ network 110.0.110.0 mask 255.255.255.224
+ network 112.0.10.0 mask 255.255.255.224
+ neighbor 100.0.13.15 remote-as 1001
+ neighbor 110.0.110.22 remote-as 101
+ neighbor 112.0.10.24 remote-as 520
+```  
+
+```
+R24#sh run | s bg
+router bgp 520
+ bgp log-neighbor-changes
+ network 98.0.98.0 mask 255.255.255.0
+ network 112.0.10.0 mask 255.255.255.224
+ neighbor 98.0.98.18 remote-as 2042
+ neighbor 112.0.10.21 remote-as 301
+```  
+
+- eBGP между Китор (R22 AS101) и Триада (R23 AS520):  
+
+```
+R22#sh run | s bg
+router bgp 101
+ bgp log-neighbor-changes
+ network 109.0.13.0 mask 255.255.255.224
+ network 110.0.110.0 mask 255.255.255.224
+ network 111.0.10.0 mask 255.255.255.224
+ neighbor 109.0.13.14 remote-as 1001
+ neighbor 110.0.110.21 remote-as 301
+ neighbor 111.0.10.23 remote-as 520
+```  
+
+```
+R23#sh run | s bg
+router bgp 520
+ bgp log-neighbor-changes
+ network 111.0.10.0 mask 255.255.255.224
+ neighbor 111.0.10.22 remote-as 101
+```  
+
+- eBGP между С.-Петербург (R18 AS2042) и Триада (R24 AS520):  
+
+```
+R18#sh run | s bg
+router bgp 2042
+ bgp log-neighbor-changes
+ network 98.0.98.0 mask 255.255.255.0
+ network 99.0.99.0 mask 255.255.255.0
+ neighbor 98.0.98.24 remote-as 520
+ neighbor 99.0.99.26 remote-as 520
+```  
+
+```
+R24#sh run | s bg
+router bgp 520
+ bgp log-neighbor-changes
+ network 98.0.98.0 mask 255.255.255.0
+ network 112.0.10.0 mask 255.255.255.224
+ neighbor 98.0.98.18 remote-as 2042
+ neighbor 112.0.10.21 remote-as 301
+```  
+
+- eBGP между С.-Петербург (R18 AS2042) и Триада (R26 AS520):  
+
+```
+R18#sh run | s bg
+router bgp 2042
+ bgp log-neighbor-changes
+ network 98.0.98.0 mask 255.255.255.0
+ network 99.0.99.0 mask 255.255.255.0
+ neighbor 98.0.98.24 remote-as 520
+ neighbor 99.0.99.26 remote-as 520
+```  
+
+```
+R26#sh run | s bg
+router bgp 520
+ bgp log-neighbor-changes
+ network 99.0.99.0 mask 255.255.255.0
+ neighbor 99.0.99.18 remote-as 2042
+```  
+
+- Проверка доступности между пограничными роутерами Москва (R14 AS1001) и С.-Петербург (R18 AS2042):  
+
+Посмотрим маршруты eBGP на этих пограничных роутерах:  
+
+```
+R14#sh ip bgp
+BGP table version is 12, local router ID is 172.16.1.14
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,
+              x best-external, a additional-path, c RIB-compressed,
+Origin codes: i - IGP, e - EGP, ? - incomplete
+RPKI validation codes: V valid, I invalid, N Not found
+
+     Network          Next Hop            Metric LocPrf Weight Path
+ *>  98.0.98.0/24     109.0.13.22                            0 101 301 520 i
+ *>  99.0.99.0/24     109.0.13.22                            0 101 301 520 2042 i
+ *>  100.0.13.0/27    109.0.13.22                            0 101 301 i
+ *   109.0.13.0/27    109.0.13.22              0             0 101 i
+ *>                   0.0.0.0                  0         32768 i
+ *>  110.0.110.0/27   109.0.13.22              0             0 101 i
+ *>  111.0.10.0/27    109.0.13.22              0             0 101 i
+ *>  112.0.10.0/27    109.0.13.22                            0 101 301 i
+```  
+
+```
+R18#sh ip bgp
+BGP table version is 8, local router ID is 172.16.1.18
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,
+              x best-external, a additional-path, c RIB-compressed,
+Origin codes: i - IGP, e - EGP, ? - incomplete
+RPKI validation codes: V valid, I invalid, N Not found
+
+     Network          Next Hop            Metric LocPrf Weight Path
+ *   98.0.98.0/24     98.0.98.24               0             0 520 i
+ *>                   0.0.0.0                  0         32768 i
+ *   99.0.99.0/24     99.0.99.26               0             0 520 i
+ *>                   0.0.0.0                  0         32768 i
+ *>  100.0.13.0/27    98.0.98.24                             0 520 301 i
+ *>  109.0.13.0/27    98.0.98.24                             0 520 301 101 i
+ *>  110.0.110.0/27   98.0.98.24                             0 520 301 i
+ *>  111.0.10.0/27    98.0.98.24                             0 520 301 101 i
+ *>  112.0.10.0/27    98.0.98.24               0             0 520 i
+```  
+Видим валидные и лучшие маршруты.  
+
+Терепь проверим IP связанность между R14 МСК и R18 С.-Петербург:  
+
+R14->R18:  
+
+```
+R14#ping 98.0.98.18
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 98.0.98.18, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
+```
+R18->R14:  
+
+```
+R18#ping 109.0.13.14
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 109.0.13.14, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
+```  
+Аналогично будет работать от R15 к R18 и наоброт с меньшим ASPath
