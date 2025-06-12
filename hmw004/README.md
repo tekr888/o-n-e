@@ -32,6 +32,7 @@
 - Настроите eBGP между Ламас и Триада;  
 - Настроите eBGP между офисом С.-Петербург и провайдером Триада;  
 - Организуете IP доступность между пограничным роутерами офисами Москва и С.-Петербург.  
+- Настройка осуществляется одновременно для IPv4 и IPv6.  
 
 # Решение:  
 
@@ -751,7 +752,265 @@ I2  2001:95:0:95::/64 [115/20]
 I2  2001:96:0:96::/64 [115/20]
      via FE80::A8BB:CCFF:FE01:8010, Ethernet0/0
 ```  
-### 16:  
+### 16: 
+
+Настроить EIGRP в С.-Петербург:  
+
+Конфигурация EIGRP R18:  
+
+```
+R18#sh run | s r e
+router eigrp EIGRP-SPB
+ !
+ address-family ipv4 unicast autonomous-system 2042
+  !
+  af-interface default
+   passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/0
+   no passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/1
+   no passive-interface
+  exit-af-interface
+  !
+  topology base
+   redistribute static
+  exit-af-topology
+  network 85.85.85.0 0.0.0.31
+  network 86.86.86.0 0.0.0.31
+  network 98.0.98.0 0.0.0.255
+  network 99.0.99.0 0.0.0.255
+  eigrp router-id 18.18.18.18
+ exit-address-family
+ !
+ address-family ipv6 unicast autonomous-system 2042
+  !
+  af-interface default
+   passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/0
+   no passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/1
+   no passive-interface
+  exit-af-interface
+  !
+  topology base
+  exit-af-topology
+ exit-address-family
+```  
+Конфигурация EIGRP R17 (анонсируют суммарные префиксы):  
+
+```
+R17#sh run | s r e
+router eigrp EIGRP-SPB
+ !
+ address-family ipv4 unicast autonomous-system 2042
+  !
+  af-interface default
+   passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/1
+   summary-address 86.86.86.0 255.255.255.224
+   no passive-interface
+  exit-af-interface
+  !
+  topology base
+  exit-af-topology
+  network 86.86.86.0 0.0.0.31
+  eigrp router-id 17.17.17.17
+ exit-address-family
+ !
+ address-family ipv6 unicast autonomous-system 2042
+  !
+  af-interface default
+   passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/1
+   summary-address 2001:86:0:86::/64
+   no passive-interface
+  exit-af-interface
+  !
+  topology base
+  exit-af-topology
+ exit-address-family
+```  
+
+Конфигурация EIGRP R16 (анонсируют суммарные префиксы):  
+
+```
+R16#sh run | s r e
+router eigrp EIGRP-SPB
+ !
+ address-family ipv4 unicast autonomous-system 2042
+  !
+  af-interface default
+   passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/1
+   summary-address 85.85.85.0 255.255.255.224
+   no passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/3
+   summary-address 0.0.0.0 0.0.0.0
+   no passive-interface
+  exit-af-interface
+  !
+  topology base
+  exit-af-topology
+  network 84.84.84.0 0.0.0.255
+  network 85.85.85.0 0.0.0.31
+  eigrp router-id 16.16.16.16
+ exit-address-family
+ !
+ address-family ipv6 unicast autonomous-system 2042
+  !
+  af-interface default
+   passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/1
+   summary-address 2001:85:0:85::/64
+   no passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/3
+   summary-address ::/0
+   no passive-interface
+  exit-af-interface
+  !
+  topology base
+  exit-af-topology
+ exit-address-family
+```  
+
+Конфигурация EIGRP R32:  
+
+```
+R32#sh run | s r e
+router eigrp EIGRP-SPB
+ !
+ address-family ipv4 unicast autonomous-system 2042
+  !
+  af-interface default
+   passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/0
+   no passive-interface
+  exit-af-interface
+  !
+  topology base
+  exit-af-topology
+  network 84.84.84.0 0.0.0.255
+  eigrp router-id 32.32.32.32
+  eigrp stub receive-only
+ exit-address-family
+ !
+ address-family ipv6 unicast autonomous-system 2042
+  !
+  af-interface default
+   passive-interface
+  exit-af-interface
+  !
+  af-interface Ethernet0/0
+   no passive-interface
+  exit-af-interface
+  !
+  topology base
+  exit-af-topology
+  eigrp stub receive-only
+ exit-address-family
+```  
+- Маршрут по умолчанию на R32:  
+
+```
+R32# sh ip route eigrp
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is 84.84.84.16 to network 0.0.0.0
+
+D*    0.0.0.0/0 [90/1536000] via 84.84.84.16, 00:07:38, Ethernet0/0
+```  
+
+Соведство напримере R16:  
+
+```
+R16# sh ip eigrp neighbors
+EIGRP-IPv4 VR(EIGRP-SPB) Address-Family Neighbors for AS(2042)
+H   Address                 Interface              Hold Uptime   SRTT   RTO  Q                                        Seq
+                                                   (sec)         (ms)       Cnt                                       Num
+1   85.85.85.18             Et0/1                    10 00:10:27 1602  5000  0                                        6
+0   84.84.84.32             Et0/3                    14 00:10:27 1595  5000  0                                        1
+```  
+```
+R16# sh ipv6 eigrp neighbors
+EIGRP-IPv6 VR(EIGRP-SPB) Address-Family Neighbors for AS(2042)
+H   Address                 Interface              Hold Uptime   SRTT   RTO  Q                                        Seq
+                                                   (sec)         (ms)       Cnt                                       Num
+1   Link-local address:     Et0/3                    13 00:10:30   10   100  0                                        1
+    FE80::A8BB:CCFF:FE02:0
+0   Link-local address:     Et0/1                    12 00:10:34 1601  5000  0                                        6
+    FE80::A8BB:CCFF:FE01:2000
+```  
+
+Проверка маршрутов EIGRP на примере R16:  
+
+```
+R16#sh ip route eigrp
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is 0.0.0.0 to network 0.0.0.0
+
+D*    0.0.0.0/0 is a summary, 00:12:49, Null0
+      86.0.0.0/27 is subnetted, 1 subnets
+D        86.86.86.0 [90/1536000] via 85.85.85.18, 00:12:49, Ethernet0/1
+      98.0.0.0/24 is subnetted, 1 subnets
+D        98.0.98.0 [90/1536000] via 85.85.85.18, 00:12:49, Ethernet0/1
+      99.0.0.0/24 is subnetted, 1 subnets
+D        99.0.99.0 [90/1536000] via 85.85.85.18, 00:12:49, Ethernet0/1
+```  
+```
+R16#sh ipv6 route eigrp
+IPv6 Routing Table - default - 7 entries
+Codes: C - Connected, L - Local, S - Static, U - Per-user Static route
+       B - BGP, HA - Home Agent, MR - Mobile Router, R - RIP
+       H - NHRP, I1 - ISIS L1, I2 - ISIS L2, IA - ISIS interarea
+       IS - ISIS summary, D - EIGRP, EX - EIGRP external, NM - NEMO
+       ND - ND Default, NDp - ND Prefix, DCE - Destination, NDr - Redirect
+       O - OSPF Intra, OI - OSPF Inter, OE1 - OSPF ext 1, OE2 - OSPF ext 2
+       ON1 - OSPF NSSA ext 1, ON2 - OSPF NSSA ext 2, la - LISP alt
+       lr - LISP site-registrations, ld - LISP dyn-eid, a - Application
+D   ::/0 [5/1024000]
+     via Null0, directly connected
+D   2001:86:0:86::/64 [90/1536000]
+     via FE80::A8BB:CCFF:FE01:2000, Ethernet0/1
+```  
 
 ### 17:
 
