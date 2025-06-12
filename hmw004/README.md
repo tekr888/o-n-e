@@ -1012,6 +1012,16 @@ D   2001:86:0:86::/64 [90/1536000]
      via FE80::A8BB:CCFF:FE01:2000, Ethernet0/1
 ```  
 
+Проверка связанности R32->R16->R18->R17:  
+
+```
+R32#ping 86.86.86.17
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 86.86.86.17, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+```  
+
 ### 17:
 
 Настроите eBGP между офисом Москва и двумя провайдерами - Киторн и Ламас:  
