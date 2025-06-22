@@ -33,6 +33,11 @@
 - Настроите eBGP между офисом С.-Петербург и провайдером Триада;  
 - Организуете IP доступность между пограничным роутерами офисами Москва и С.-Петербург.  
 - Настройка осуществляется одновременно для IPv4 и IPv6.  
+18. Настроить iBGP в офисе Москва. Настроить iBGP в сети провайдера Триада  
+- Настроите iBGP в офисом Москва между маршрутизаторами R14 и R15.  
+- Настроите iBGP в провайдере Триада, с использованием RR.  
+- Настройте офис Москва так, чтобы приоритетным провайдером стал Ламас.  
+- Настройте офиса С.-Петербург так, чтобы трафик до любого офиса распределялся по двум линкам одновременно.  
 
 # Решение:  
 
@@ -1250,4 +1255,232 @@ Sending 5, 100-byte ICMP Echos to 109.0.13.14, timeout is 2 seconds:
 !!!!!
 Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
 ```  
-Аналогично будет работать от R15 к R18 и наоброт с меньшим ASPath
+Аналогично будет работать от R15 к R18 и наоброт с меньшим ASPath  
+
+### 18:  
+
+- Настроите iBGP в офисом Москва между маршрутизаторами R14 и R15.  
+
+И  
+
+- Настройте офис Москва так, чтобы приоритетным провайдером стал Ламас.  
+
+Настройки iBGP на R14 и настройка приоритетного провайдера Ламас:  
+
+```
+!
+router ospf 1
+ router-id 1.1.1.1
+ area 10 stub
+ area 101 stub no-summary
+ network 172.16.1.0 0.0.0.255 area 0
+!
+router bgp 1001
+ bgp log-neighbor-changes
+ network 100.100.100.0 mask 255.255.255.0
+ network 109.0.13.0 mask 255.255.255.224
+ redistribute connected
+ neighbor 100.100.100.15 remote-as 1001
+ neighbor 100.100.100.15 weight 300
+ neighbor 109.0.13.22 remote-as 101
+ neighbor 109.0.13.22 weight 100
+ neighbor 172.16.1.15 remote-as 1001
+ neighbor 172.16.1.15 update-source Loopback0
+```  
+Проверка маршрутов BGP:  
+
+```
+R14#sh ip bgp summary
+BGP router identifier 172.16.1.14, local AS number 1001
+BGP table version is 135066, main routing table version 135066
+18 network entries using 2520 bytes of memory
+46 path entries using 3680 bytes of memory
+10/7 BGP path/bestpath attribute entries using 1440 bytes of memory
+6 BGP AS-PATH entries using 144 bytes of memory
+0 BGP route-map cache entries using 0 bytes of memory
+0 BGP filter-list cache entries using 0 bytes of memory
+BGP using 7784 total bytes of memory
+BGP activity 21/3 prefixes, 214/168 paths, scan interval 60 secs
+
+Neighbor        V           AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+100.100.100.15  4         1001      85      87   135066    0    0 01:06:18       15
+109.0.13.22     4          101    9458   27720   135066    0    0 3d15h          10
+172.16.1.15     4         1001     131     134   135066    0    0 01:35:37       15  
+####################################################################################  
+R14#sh ip bgp
+BGP table version is 135066, local router ID is 172.16.1.14
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,
+              x best-external, a additional-path, c RIB-compressed,
+Origin codes: i - IGP, e - EGP, ? - incomplete
+RPKI validation codes: V valid, I invalid, N Not found
+
+     Network          Next Hop            Metric LocPrf Weight Path
+ *>i 95.0.95.0/27     100.0.13.21              0    100    300 301 520 i
+ * i                  100.0.13.21              0    100      0 301 520 i
+ *                    109.0.13.22                          100 101 520 i
+ *>i 96.0.96.0/27     100.0.13.21              0    100    300 301 520 i
+ * i                  100.0.13.21              0    100      0 301 520 i
+ *                    109.0.13.22                          100 101 520 i
+ *>i 97.0.97.0/27     100.0.13.21              0    100    300 301 520 i
+ * i                  100.0.13.21              0    100      0 301 520 i
+ *                    109.0.13.22                          100 101 520 i
+ *>i 98.0.98.0/24     100.0.13.21              0    100    300 301 520 i
+ * i                  100.0.13.21              0    100      0 301 520 i
+ *                    109.0.13.22                          100 101 520 i
+ *>i 99.0.99.0/24     100.0.13.21              0    100    300 301 520 i
+ * i                  100.0.13.21              0    100      0 301 520 i
+     Network          Next Hop            Metric LocPrf Weight Path
+ *                    109.0.13.22                          100 101 520 i
+ *>  100.0.9.0/28     0.0.0.0                  0         32768 ?
+ * i 100.0.10.0/28    100.100.100.15           0    100    300 ?
+ * i                  172.16.1.15              0    100      0 ?
+ *>                   0.0.0.0                  0         32768 ?
+ r>i 100.0.11.0/28    100.100.100.15           0    100    300 ?
+ r i                  172.16.1.15              0    100      0 ?
+ *>  100.0.12.0/27    0.0.0.0                  0         32768 ?
+ *>i 100.0.13.0/27    100.100.100.15           0    100    300 i
+ * i                  172.16.1.15              0    100      0 i
+ *                    109.0.13.22                          100 101 301 i
+ r>i 100.0.16.0/27    100.100.100.15           0    100    300 ?
+ r i                  172.16.1.15              0    100      0 ?
+ * i 100.100.100.0/24 100.100.100.15           0    100    300 i
+ * i                  172.16.1.15              0    100      0 i
+ *>                   0.0.0.0                  0         32768 i
+ * i 109.0.13.0/27    100.0.13.21              0    100    300 301 101 i
+ * i                  100.0.13.21              0    100      0 301 101 i
+ *                    109.0.13.22              0           100 101 i
+ *>                   0.0.0.0                  0         32768 i
+ *>i 110.0.110.0/27   100.0.13.21              0    100    300 301 i
+ * i                  100.0.13.21              0    100      0 301 i
+     Network          Next Hop            Metric LocPrf Weight Path
+ *                    109.0.13.22              0           100 101 i
+ *>i 111.0.10.0/27    100.0.13.21              0    100    300 301 101 i
+ * i                  100.0.13.21              0    100      0 301 101 i
+ *                    109.0.13.22              0           100 101 i
+ *>i 112.0.10.0/27    100.0.13.21              0    100    300 301 i
+ * i                  100.0.13.21              0    100      0 301 i
+ *                    109.0.13.22                          100 101 301 i
+ *>  172.16.1.14/32   0.0.0.0                  0         32768 ?
+ *>i 172.16.1.15/32   100.100.100.15           0    100    300 ?
+ * i                  172.16.1.15              0    100      0 ?
+```  
+Что бы Ламас(AS 301) стал приоритетным провайдером на R14 добавим атрибут weight(выше в конфигурации) в сторону R15, т.к. R15 выходит на провайдера Ламас.  
+Проверим с R12 выключив интерфейс соединяющий R12 с R15 и проверим связанность с R23 (111.0.10.23):  
+
+```
+R12(config)# interface Ethernet0/3
+R12(config-if)#shu
+R12(config-if)#
+*Jun 22 11:00:19.595: %LINK-5-CHANGED: Interface Ethernet0/3, changed state to administratively down
+*Jun 22 11:00:20.600: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/3, changed state to down
+R12(config-if)#do ping 111.0.10.23
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 111.0.10.23, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
+R12(config-if)#do trace 111.0.10.23
+Type escape sequence to abort.
+Tracing the route to 111.0.10.23
+VRF info: (vrf in name/id, vrf out name/id)
+  1 100.0.10.14 1 msec 0 msec 0 msec
+  2  *  *  *
+  3  *  *  *
+  4 110.0.110.22 1 msec 2 msec 1 msec
+  5 111.0.10.23 1 msec *  3 msec
+```  
+В примере выше через трассировку может показаться что атрибут weight не работает, на самом деле мартшрут прошел следующим образом:  
+
+R12(AS1001, 100.0.10.12/28)->R14(AS1001, 100.0.10.14/28)->R14(AS1001, 100.100.100.14/24)->R15(AS1001, 100.100.100.15/24)->R15(AS1001, 100.0.13.15/27)->R21(AS301, 100.0.13.21/27)->R21(AS301, 110.0.110.21/27)->R22(AS101, 110.0.110.22/27)->R22(AS101, 111.0.10.22/27)->R23(AS101, 111.0.10.23/27)  
+
+Более наглядно моно увидеть это с R14:  
+```
+R14#trace 111.0.10.23
+Type escape sequence to abort.
+Tracing the route to 111.0.10.23
+VRF info: (vrf in name/id, vrf out name/id)
+  1 100.100.100.15 1 msec 0 msec 1 msec
+  2 100.0.13.21 0 msec 1 msec 0 msec
+  3 110.0.110.22 [AS 301] 0 msec 1 msec 1 msec
+  4 111.0.10.23 [AS 101] 1 msec *  2 msec
+```  
+Настройки iBGP на R15:  
+
+```
+!
+router ospf 1
+ router-id 1.1.1.2
+ area 102 filter-list prefix DENY_101_ZONE in
+ network 172.16.1.0 0.0.0.1 area 0
+!
+router bgp 1001
+ bgp log-neighbor-changes
+ network 100.0.13.0 mask 255.255.255.224
+ network 100.100.100.0 mask 255.255.255.0
+ redistribute connected
+ neighbor 100.0.13.21 remote-as 301
+ neighbor 100.100.100.14 remote-as 1001
+ neighbor 172.16.1.14 remote-as 1001
+ neighbor 172.16.1.14 update-source Loopback0
+```  
+
+Проверка маршрутов BGP:  
+
+```
+R15#sh ip bgp summary
+BGP router identifier 172.16.1.15, local AS number 1001
+BGP table version is 161, main routing table version 161
+18 network entries using 2520 bytes of memory
+28 path entries using 2240 bytes of memory
+7/6 BGP path/bestpath attribute entries using 1008 bytes of memory
+3 BGP AS-PATH entries using 72 bytes of memory
+0 BGP route-map cache entries using 0 bytes of memory
+0 BGP filter-list cache entries using 0 bytes of memory
+BGP using 5840 total bytes of memory
+BGP activity 35/17 prefixes, 31289/31261 paths, scan interval 60 secs
+
+Neighbor        V           AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+100.0.13.21     4          301    5873    5879      161    0    0 3d16h          10
+100.100.100.14  4         1001      90      88      161    0    0 01:08:59        6
+172.16.1.14     4         1001     137     134      161    0    0 01:38:17        6  
+########################################################################################  
+R15#sh ip bgp
+BGP table version is 161, local router ID is 172.16.1.15
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,
+              x best-external, a additional-path, c RIB-compressed,
+Origin codes: i - IGP, e - EGP, ? - incomplete
+RPKI validation codes: V valid, I invalid, N Not found
+
+     Network          Next Hop            Metric LocPrf Weight Path
+ *>  95.0.95.0/27     100.0.13.21                          200 301 520 i
+ *>  96.0.96.0/27     100.0.13.21                          200 301 520 i
+ *>  97.0.97.0/27     100.0.13.21                          200 301 520 i
+ *>  98.0.98.0/24     100.0.13.21                          200 301 520 i
+ *>  99.0.99.0/24     100.0.13.21                          200 301 520 i
+ r>i 100.0.9.0/28     100.100.100.14           0    100      0 ?
+ r i                  172.16.1.14              0    100      0 ?
+ * i 100.0.10.0/28    100.100.100.14           0    100      0 ?
+ * i                  172.16.1.14              0    100      0 ?
+ *>                   0.0.0.0                  0         32768 ?
+ *>  100.0.11.0/28    0.0.0.0                  0         32768 ?
+ r>i 100.0.12.0/27    100.100.100.14           0    100      0 ?
+ r i                  172.16.1.14              0    100      0 ?
+ *   100.0.13.0/27    100.0.13.21              0           200 301 i
+     Network          Next Hop            Metric LocPrf Weight Path
+ *>                   0.0.0.0                  0         32768 i
+ *>  100.0.16.0/27    0.0.0.0                  0         32768 ?
+ * i 100.100.100.0/24 100.100.100.14           0    100      0 i
+ * i                  172.16.1.14              0    100      0 i
+ *>                   0.0.0.0                  0         32768 i
+ * i 109.0.13.0/27    100.100.100.14           0    100      0 i
+ * i                  172.16.1.14              0    100      0 i
+ *>                   100.0.13.21                          200 301 101 i
+ *>  110.0.110.0/27   100.0.13.21              0           200 301 i
+ *>  111.0.10.0/27    100.0.13.21                          200 301 101 i
+ *>  112.0.10.0/27    100.0.13.21              0           200 301 i
+ r>i 172.16.1.14/32   100.100.100.14           0    100      0 ?
+ r i                  172.16.1.14              0    100      0 ?
+ *>  172.16.1.15/32   0.0.0.0                  0         32768 ?
+```  
+
