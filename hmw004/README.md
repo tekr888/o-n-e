@@ -1484,3 +1484,162 @@ RPKI validation codes: V valid, I invalid, N Not found
  *>  172.16.1.15/32   0.0.0.0                  0         32768 ?
 ```  
 
+- Настроите iBGP в провайдере Триада, с использованием RR:  
+
+Топология IBGP Triada(AS 520):  
+![](ibgptriada.png)  
+
+В данной топологии R23 и R24 являются RR:  
+
+Не забываем повесить процессы ospf на интерфейсы что связывают оборудование друг с другом.  
+
+Конфигурация R23:  
+```
+!
+router ospf 1
+ router-id 23.23.23.23
+ network 172.16.1.0 0.0.0.255 area 0
+!
+router bgp 520
+ bgp router-id 23.23.23.23
+ bgp cluster-id 23.23.23.23
+ bgp log-neighbor-changes
+ network 95.0.95.0 mask 255.255.255.224
+ network 96.0.96.0 mask 255.255.255.224
+ network 111.0.10.0 mask 255.255.255.224
+ neighbor 95.0.95.25 remote-as 520
+ neighbor 95.0.95.25 route-reflector-client
+ neighbor 96.0.96.24 remote-as 520
+ neighbor 111.0.10.22 remote-as 101
+ neighbor 172.16.1.24 remote-as 520
+ neighbor 172.16.1.24 update-source Loopback0
+ neighbor 172.16.1.25 remote-as 520
+ neighbor 172.16.1.25 update-source Loopback0
+!
+```  
+
+Конфигурация R25:  
+```
+!
+router ospf 1
+ router-id 25.25.25.25
+ network 172.16.1.0 0.0.0.255 area 0
+!
+router bgp 520
+ bgp log-neighbor-changes
+ network 95.0.95.0 mask 255.255.255.224
+ neighbor 95.0.95.23 remote-as 520
+ neighbor 172.16.1.23 remote-as 520
+ neighbor 172.16.1.23 update-source Loopback0
+!
+```  
+
+Конфигурация R24:  
+```
+!
+router ospf 1
+ router-id 24.24.24.24
+ network 172.16.1.0 0.0.0.255 area 0
+!
+router bgp 520
+ bgp router-id 24.24.24.24
+ bgp cluster-id 24.24.24.24
+ bgp log-neighbor-changes
+ network 96.0.96.0 mask 255.255.255.224
+ network 97.0.97.0 mask 255.255.255.224
+ network 98.0.98.0 mask 255.255.255.0
+ network 112.0.10.0 mask 255.255.255.224
+ neighbor 96.0.96.23 remote-as 520
+ neighbor 97.0.97.26 remote-as 520
+ neighbor 97.0.97.26 route-reflector-client
+ neighbor 98.0.98.18 remote-as 2042
+ neighbor 112.0.10.21 remote-as 301
+ neighbor 172.16.1.23 remote-as 520
+ neighbor 172.16.1.23 update-source Loopback0
+ neighbor 172.16.1.26 remote-as 520
+ neighbor 172.16.1.26 update-source Loopback0
+!
+```  
+
+Конфигурация R26:  
+```
+!
+router ospf 1
+ router-id 26.26.26.26
+ network 172.16.1.0 0.0.0.255 area 0
+!
+router bgp 520
+ bgp log-neighbor-changes
+ network 97.0.97.0 mask 255.255.255.224
+ network 99.0.99.0 mask 255.255.255.0
+ neighbor 97.0.97.24 remote-as 520
+ neighbor 99.0.99.18 remote-as 2042
+ neighbor 172.16.1.24 remote-as 520
+ neighbor 172.16.1.24 update-source Loopback0
+!
+```  
+Проверка связанности с R25(AS520)->R26(AS520):  
+```
+R25#ping 97.0.97.26
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 97.0.97.26, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
+R25#trace 97.0.97.26
+Type escape sequence to abort.
+Tracing the route to 97.0.97.26
+VRF info: (vrf in name/id, vrf out name/id)
+  1 95.0.95.23 0 msec 1 msec 0 msec
+  2 96.0.96.24 1 msec 0 msec 1 msec
+  3 97.0.97.26 1 msec *  0 msec
+```  
+- Настройте офиса С.-Петербург так, чтобы трафик до любого офиса распределялся по двум линкам одновременно.  
+
+Необходимо поднять EBGP до R24 и R26 с одинаковой стоимостью для того что бы заработал ECMP:  
+```
+!
+router bgp 2042
+ bgp log-neighbor-changes
+ network 98.0.98.0 mask 255.255.255.0
+ network 99.0.99.0 mask 255.255.255.0
+ neighbor 98.0.98.24 remote-as 520
+ neighbor 99.0.99.26 remote-as 520
+ maximum-paths 2
+!
+```  
+Проверка:  
+```
+R18#sh ip bgp summary
+BGP router identifier 172.16.1.18, local AS number 2042
+BGP table version is 162, main routing table version 162
+18 network entries using 2520 bytes of memory
+38 path entries using 3040 bytes of memory
+16 multipath network entries and 32 multipath paths
+7/7 BGP path/bestpath attribute entries using 1008 bytes of memory
+4 BGP AS-PATH entries using 96 bytes of memory
+0 BGP route-map cache entries using 0 bytes of memory
+0 BGP filter-list cache entries using 0 bytes of memory
+BGP using 6664 total bytes of memory
+BGP activity 42/24 prefixes, 63/25 paths, scan interval 60 secs
+
+Neighbor        V           AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+98.0.98.24      4          520    4305    4306      162    0    0 2d16h          18
+99.0.99.26      4          520    5903    5917      162    0    0 3d17h          18
+########################################################################################  
+R18#sh ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is 99.0.99.26 to network 0.0.0.0
+
+S*    0.0.0.0/0 [1/0] via 99.0.99.26
+                [1/0] via 98.0.98.24
+```  
+В данной конфигурации так же реализован был SLA по предыдущим заданиям.
