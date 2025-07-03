@@ -38,6 +38,11 @@
 - Настроите iBGP в провайдере Триада, с использованием RR.  
 - Настройте офис Москва так, чтобы приоритетным провайдером стал Ламас.  
 - Настройте офиса С.-Петербург так, чтобы трафик до любого офиса распределялся по двум линкам одновременно.  
+19. Настроить фильтрацию для офиса Москва и С.-Петербург  
+- Настроить фильтрацию в офисе Москва так, чтобы не появилось транзитного трафика(As-path).  
+- Настроить фильтрацию в офисе С.-Петербург так, чтобы не появилось транзитного трафика(Prefix-list).  
+- Настроить провайдера Киторн так, чтобы в офис Москва отдавался только маршрут по умолчанию.  
+- Настроить провайдера Ламас так, чтобы в офис Москва отдавался только маршрут по умолчанию и префикс офиса С.-Петербург.  
 
 # Решение:  
 
@@ -1643,3 +1648,156 @@ S*    0.0.0.0/0 [1/0] via 99.0.99.26
                 [1/0] via 98.0.98.24
 ```  
 В данной конфигурации так же реализован был SLA по предыдущим заданиям.
+
+### 19:  
+
+- Настроить фильтрацию в офисе Москва так, чтобы не появилось транзитного трафика(As-path):  
+
+Для решения данной задачи на R14 и R15 необходимо создать AS-Path access-list следующего вида и повесить его в сторону нужного соседа:  
+```
+!
+ip as-path access-list 5 permit ^$
+!
+```  
+
+Настройки bgp на R14:
+```
+!
+router bgp 1001
+ bgp log-neighbor-changes
+ network 109.0.13.0 mask 255.255.255.224
+ neighbor 109.0.13.22 remote-as 101
+ neighbor 109.0.13.22 soft-reconfiguration inbound
+ neighbor 109.0.13.22 filter-list 5 out
+ neighbor 172.16.1.15 remote-as 1001
+ neighbor 172.16.1.15 update-source Loopback0
+ neighbor 172.16.1.15 weight 300
+!
+```  
+
+Настройки bgp на R15:
+```
+!
+router bgp 1001
+ bgp log-neighbor-changes
+ network 100.0.13.0 mask 255.255.255.224
+ neighbor 100.0.13.21 remote-as 301
+ neighbor 100.0.13.21 soft-reconfiguration inbound
+ neighbor 100.0.13.21 filter-list 5 out
+ neighbor 172.16.1.14 remote-as 1001
+ neighbor 172.16.1.14 update-source Loopback0
+!
+```  
+- Настроить фильтрацию в офисе С.-Петербург так, чтобы не появилось транзитного трафика(Prefix-list).  
+
+Для решения этой задачи создадим Prefex-list следующего вида и route * Null0, применим его к нужным соседям EBGP:  
+```
+ip route 172.16.1.0 255.255.255.0 Null0
+ip prefix-list WITHOUT_TRANSIT seq 10 permit 172.16.1.0/24
+```  
+### Так же не забываем указать "ip route 98.0.98.0 255.255.255.0 Null0" на R24 и "ip route 99.0.99.0 255.255.255.0 Null0" на R26.  
+
+Настройки bgp на R18:
+```
+!
+router bgp 2042
+ bgp log-neighbor-changes
+ bgp bestpath as-path multipath-relax
+ network 98.0.98.0 mask 255.255.255.0
+ network 99.0.99.0 mask 255.255.255.0
+ network 172.16.1.0 mask 255.255.255.0
+ neighbor 98.0.98.24 remote-as 520
+ neighbor 98.0.98.24 prefix-list WITHOUT_TRANSIT out
+ neighbor 99.0.99.26 remote-as 520
+ neighbor 99.0.99.26 prefix-list WITHOUT_TRANSIT out
+ maximum-paths 2
+!
+```  
+- Настроить провайдера Киторн так, чтобы в офис Москва отдавался только маршрут по умолчанию.  
+
+Для решения этой задачи создадим Prefix-list c дефолтным маршрутом и нацелим его в сторону R14:  
+```
+ip prefix-list DEF-TO-R14-MSK seq 5 permit 0.0.0.0/0
+```  
+
+Настройки bgp на R22:
+```
+!
+router bgp 101
+ bgp log-neighbor-changes
+ network 0.0.0.0
+ network 109.0.13.0 mask 255.255.255.224
+ network 110.0.110.0 mask 255.255.255.224
+ network 111.0.10.0 mask 255.255.255.224
+ neighbor 109.0.13.14 remote-as 1001
+ neighbor 109.0.13.14 prefix-list DEF-TO-R14-MSK out
+ neighbor 110.0.110.21 remote-as 301
+ neighbor 111.0.10.23 remote-as 520
+!
+```  
+
+- Настроить провайдера Ламас так, чтобы в офис Москва отдавался только маршрут по умолчанию и префикс офиса С.-Петербург.  
+
+Для решения этой задачи создадим AS-Path с регулярным выражением для AS2042 и нацелим его в сторону R15:  
+```
+ip as-path access-list 5 permit 2042$
+```  
+
+Для передачи маршрута по умолчанию в данном вариант используем следующую команду:  
+```
+neighbor 100.0.13.15 default-originate
+```  
+Настройки bgp на R21:
+```
+!
+router bgp 301
+ bgp log-neighbor-changes
+ network 100.0.13.0 mask 255.255.255.224
+ network 110.0.110.0 mask 255.255.255.224
+ network 112.0.10.0 mask 255.255.255.224
+ neighbor 100.0.13.15 remote-as 1001
+ neighbor 100.0.13.15 default-originate
+ neighbor 100.0.13.15 filter-list 5 out
+ neighbor 110.0.110.22 remote-as 101
+ neighbor 112.0.10.24 remote-as 520
+!
+```  
+
+## Проверка:  
+
+На R14:  
+```
+R14#sh ip bgp neighbors 109.0.13.22 received-routes
+BGP table version is 3, local router ID is 172.16.1.14
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,
+              x best-external, a additional-path, c RIB-compressed,
+Origin codes: i - IGP, e - EGP, ? - incomplete
+RPKI validation codes: V valid, I invalid, N Not found
+
+     Network          Next Hop            Metric LocPrf Weight Path
+ *>  0.0.0.0          109.0.13.22              0             0 101 i
+
+Total number of prefixes 1
+```
+
+На R15:  
+```
+R15#sh ip bgp neighbors 100.0.13.21 received-routes
+BGP table version is 15, local router ID is 172.16.1.15
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,
+              x best-external, a additional-path, c RIB-compressed,
+Origin codes: i - IGP, e - EGP, ? - incomplete
+RPKI validation codes: V valid, I invalid, N Not found
+
+     Network          Next Hop            Metric LocPrf Weight Path
+ *>  0.0.0.0          100.0.13.21                            0 301 i
+ *>  172.16.1.0/24    100.0.13.21                            0 301 520 2042 i
+
+Total number of prefixes 2
+```  
+Для того что бы отработала команда "sh ip bgp neighbors *.*.*.* received-routes" на R14 и R15 необходимо добаить в сторону своего соседа R21 и R22:
+```
+neighbor *.*.*.* soft-reconfiguration inbound
+```  
