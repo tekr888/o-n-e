@@ -1883,4 +1883,119 @@ ip nat inside
 ip nat ouside
 ```  
 
-Настроите для IPv4 DHCP сервер в офисе Москва на маршрутизаторах R12 и R13. VPC1 и VPC7 должны получать сетевые настройки по DHCP.
+- Настройки для IPv4 DHCP сервер в офисе Москва на маршрутизаторах R12 и R13:  
+
+R12:  
+```
+!
+ip dhcp excluded-address 10.177.12.254
+ip dhcp excluded-address 10.177.13.254
+ip dhcp excluded-address 10.177.12.1 10.177.12.10
+ip dhcp excluded-address 10.177.13.1 10.177.13.10
+ip dhcp excluded-address 10.177.12.128 10.177.12.253
+ip dhcp excluded-address 10.177.13.128 10.177.13.253
+!
+ip dhcp pool VLAN12
+ network 10.177.12.0 255.255.255.0
+ default-router 10.177.12.254
+ domain-name otus.lab
+ dns-server 10.177.11.1
+ lease 2 12 30
+!
+ip dhcp pool VLAN13
+ network 10.177.13.0 255.255.255.0
+ domain-name otus.lab
+ dns-server 10.177.11.1
+ default-router 10.177.13.254
+ lease 2 12 30
+!
+```  
+
+R13:  
+```
+!
+ip dhcp excluded-address 10.177.12.254
+ip dhcp excluded-address 10.177.12.1 10.177.12.127
+ip dhcp excluded-address 10.177.13.254
+ip dhcp excluded-address 10.177.13.1 10.177.13.127
+!
+ip dhcp pool VLAN12
+ network 10.177.12.0 255.255.255.0
+ default-router 10.177.12.254
+ domain-name otus.lab
+ dns-server 10.177.12.2
+ lease 2 12 30
+!
+ip dhcp pool VLAN13
+ network 10.177.13.0 255.255.255.0
+ default-router 10.177.13.254
+ dns-server 10.177.13.2
+ domain-name otus.lab
+ lease 2 12 30
+!
+```  
+
+На SW3-4-5 не забываем указать ip helper-address c адресом dhcp-севрера
+
+Получение ip:  
+```
+VPC1> show ip
+
+NAME        : VPC1[1]
+IP/MASK     : 10.177.12.128/24
+GATEWAY     : 10.177.12.254
+DNS         : 10.177.12.2
+DHCP SERVER : 10.177.12.2
+DHCP LEASE  : 216872, 217800/108900/190575
+DOMAIN NAME : otus.lab
+MAC         : 00:50:79:66:68:01
+LPORT       : 20000
+RHOST:PORT  : 127.0.0.1:30000
+MTU         : 1500
+```  
+```
+VPC7> sh ip
+
+NAME        : VPC7[1]
+IP/MASK     : 10.177.13.129/24
+GATEWAY     : 10.177.13.254
+DNS         : 10.177.13.2
+DHCP SERVER : 10.177.13.2
+DHCP LEASE  : 217795, 217800/108900/190575
+DOMAIN NAME : otus.lab
+MAC         : 00:50:79:66:68:07
+LPORT       : 20000
+RHOST:PORT  : 127.0.0.1:30000
+MTU         : 1500
+```  
+
+- Настройки NTP на R12 и R13:  
+```
+!
+ntp master 3
+ntp update-calendar
+!
+```  
+
+Настройки NTP клиентов со стороны R14:  
+```
+!
+ntp server 100.0.10.12
+ntp server 100.0.9.13
+!
+```
+Настройки NTP клиентов со стороны R15:  
+```
+!
+ntp server 100.0.11.12
+ntp server 100.0.10.13
+!
+```  
+
+Настройки NTP со стороны SW3-4-5-6:  
+```
+!
+ntp server 10.177.11.1
+ntp server 10.177.11.2
+!
+```  
