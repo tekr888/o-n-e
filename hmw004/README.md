@@ -50,7 +50,10 @@
 - Настроите NAT так, чтобы R19 был доступен с любого узла для удаленного управления.
 - *. Настроите статический NAT(PAT) для офиса Чокурдах.
 - Настроите для IPv4 DHCP сервер в офисе Москва на маршрутизаторах R12 и R13. VPC1 и VPC7 должны получать сетевые настройки по DHCP.
-- Настроите NTP сервер на R12 и R13. Все устройства в офисе Москва должны синхронизировать время с R12 и R13.
+- Настроите NTP сервер на R12 и R13. Все устройства в офисе Москва должны синхронизировать время с R12 и R13.  
+21. Настроить GRE между офисами Москва и С.-Петербург, настроить DMVPN между офисами Москва и Чокурдах, Лабытнанги  
+- Настроите GRE между офисами Москва и С.-Петербург.  
+- Настроите DMVMN между Москва и Чокурдах, Лабытнанги.  
 
 # Решение:  
 
@@ -1998,4 +2001,181 @@ ntp server 100.0.10.13
 ntp server 10.177.11.1
 ntp server 10.177.11.2
 !
+```  
+### 21  
+
+- Настроите GRE между офисами Москва и С.-Петербург:  
+
+Пример настройки GRE между МСК(R15) и СПБ(R18)  
+
+R15:  
+```
+!
+interface Tunnel0
+ description -=To SPB GRE=-
+ ip address 10.10.10.1 255.255.255.0
+ ip mtu 1400
+ ip tcp adjust-mss 1360
+ tunnel source 100.0.13.15
+ tunnel destination 98.0.98.18
+ !
+```  
+
+R18:  
+```
+!
+interface Tunnel0
+ description -=To MSK GRE=-
+ ip address 10.10.10.2 255.255.255.0
+ ip mtu 1400
+ ip tcp adjust-mss 1360
+ tunnel source 98.0.98.18
+ tunnel destination 100.0.13.15
+ !
+```  
+
+Проверка:  
+```
+R18#sh ip int br
+Interface                  IP-Address      OK? Method Status                Protocol
+Ethernet0/0                85.85.85.18     YES NVRAM  up                    up
+Ethernet0/1                86.86.86.18     YES NVRAM  up                    up
+Ethernet0/2                98.0.98.18      YES NVRAM  up                    up
+Ethernet0/3                99.0.99.18      YES NVRAM  up                    up
+Loopback0                  172.16.1.18     YES NVRAM  up                    up
+NVI0                       85.85.85.18     YES unset  up                    up
+Tunnel0                    10.10.10.2      YES manual up                    up
+```  
+
+- Настроите DMVMN между Москва и Чокурдах, Лабытнанги:  
+
+MSK(SPOKE), Чокурдах(SPOKE), Лабытнанги(HUB).  
+
+R27(HUB):  
+Конфигурация с IPSec и передачей маршрута внутри шифрованного туннеля с помощью OSPF, роль внутр сети на R27 выполняет int Loopback1  
+```
+!
+interface Loopback1
+ ip address 10.177.20.1 255.255.255.0
+!
+interface Tunnel1
+ description -=HUB DMVPN=-
+ ip address 10.10.11.1 255.255.255.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication otus
+ ip nhrp map multicast dynamic
+ ip nhrp network-id 10
+ ip tcp adjust-mss 1360
+ ip ospf network broadcast
+ ip ospf priority 10
+ tunnel source Ethernet0/0
+ tunnel mode gre multipoint
+ tunnel key 10
+ tunnel protection ipsec profile OTUSTUN
+!
+crypto isakmp policy 1
+ encr aes 256
+ hash sha256
+ authentication pre-share
+ group 16
+crypto isakmp key 6 otus address 0.0.0.0
+!
+!
+crypto ipsec transform-set TS1 esp-aes 256 esp-sha256-hmac
+ mode tunnel
+!
+crypto ipsec profile OTUSTUN
+ set security-association lifetime seconds 28800
+ set transform-set TS1
+!
+router ospf 1
+ router-id 27.27.27.27
+ network 10.10.11.0 0.0.0.255 area 0
+ network 10.177.20.0 0.0.0.255 area 0
+!
+```  
+R28(SPOKE) на R14 внвлогично:  
+```
+interface Tunnel1
+ ip address 10.10.11.2 255.255.255.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication otus
+ ip nhrp map multicast 200.20.2.27
+ ip nhrp map 10.10.11.1 200.20.2.27
+ ip nhrp network-id 10
+ ip nhrp nhs 10.10.11.1
+ ip nhrp registration no-unique
+ ip tcp adjust-mss 1360
+ ip ospf network broadcast
+ ip ospf priority 0
+ tunnel source Ethernet0/1
+ tunnel mode gre multipoint
+ tunnel key 10
+ tunnel protection ipsec profile OTUSTUN
+!
+crypto isakmp policy 1
+ encr aes 256
+ hash sha256
+ authentication pre-share
+ group 16
+crypto isakmp key 6 otus address 200.20.2.27     255.255.255.0
+!
+crypto ipsec transform-set TS1 esp-aes 256 esp-sha256-hmac
+ mode tunnel
+!
+crypto ipsec profile OTUSTUN
+ set security-association lifetime seconds 28800
+ set transform-set TS1
+!
+router ospf 1
+ router-id 28.28.28.28
+ network 10.10.11.0 0.0.0.255 area 0
+ network 10.177.16.0 0.0.3.255 area 0
+!
+```  
+
+Проверка:  
+```
+R27# sh dmvpn
+Legend: Attrb --> S - Static, D - Dynamic, I - Incomplete
+        N - NATed, L - Local, X - No Socket
+        # Ent --> Number of NHRP entries with same NBMA peer
+        NHS Status: E --> Expecting Replies, R --> Responding, W --> Waiting
+        UpDn Time --> Up or Down Time for a Tunnel
+==========================================================================
+
+Interface: Tunnel1, IPv4 NHRP Details
+Type:Hub, NHRP Peers:1,
+
+ # Ent  Peer NBMA Addr Peer Tunnel Add State  UpDn Tm Attrb
+ ----- --------------- --------------- ----- -------- -----
+     1 92.0.92.28           10.10.11.2    UP    4d03h     D
+
+```  
+
+Пинг внутр адреса туннеля и VPV30
+```
+R27#ping 10.10.11.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.10.11.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 5/5/6 ms
+R27#ping 10.177.18.11
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.177.18.11, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 6/6/7 ms
+```  
+
+Пинг с VPC31 внутр сети на стороне Лабытнанги:  
+```
+VPC31> ping 10.177.20.1
+
+84 bytes from 10.177.20.1 icmp_seq=1 ttl=254 time=1.591 ms
+84 bytes from 10.177.20.1 icmp_seq=2 ttl=254 time=2.464 ms
+84 bytes from 10.177.20.1 icmp_seq=3 ttl=254 time=2.065 ms
+84 bytes from 10.177.20.1 icmp_seq=4 ttl=254 time=2.924 ms
+84 bytes from 10.177.20.1 icmp_seq=5 ttl=254 time=2.234 ms
 ```  
